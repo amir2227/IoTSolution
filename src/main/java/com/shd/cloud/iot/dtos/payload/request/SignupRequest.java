@@ -1,6 +1,9 @@
 package com.shd.cloud.iot.dtos.payload.request;
 
 import java.util.Set;
+
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -10,7 +13,10 @@ public class SignupRequest {
     private String username;
 
     @NotBlank
-    @Size(max = 11)
+    private String fullname;
+
+    @NotBlank
+    @Size(min = 11, max = 11)
     private String phone;
 
     private Set<String> role;
@@ -25,6 +31,14 @@ public class SignupRequest {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getFullname() {
+        return fullname;
+    }
+
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
     }
 
     public String getPhone() {

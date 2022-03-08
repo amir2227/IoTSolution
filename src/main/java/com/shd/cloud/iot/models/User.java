@@ -43,9 +43,10 @@ public class User {
     }
 
     public User(@NotBlank @Size(max = 20) String username, @NotBlank @Size(max = 11) String phone,
-            @NotBlank @Size(max = 120) String password) {
+            String fullname, @NotBlank @Size(max = 120) String password) {
         this.username = username;
         this.phone = phone;
+        this.fullname = fullname;
         this.password = password;
     }
 
