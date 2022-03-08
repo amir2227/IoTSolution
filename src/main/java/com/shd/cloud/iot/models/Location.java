@@ -87,4 +87,20 @@ public class Location {
         this.sensors = sensors;
     }
 
+    public Location getParent() {
+        return parent;
+    }
+
+    public void setParent(Location parent) {
+        this.parent = parent;
+    }
+
+    public List<Location> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<Location> children) {
+        this.children = children;
+    }
+
 }

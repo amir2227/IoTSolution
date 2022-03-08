@@ -3,6 +3,10 @@ package com.shd.cloud.iot.sevices;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.ws.rs.BadRequestException;
+
+import java.util.Optional;
+
 import com.shd.cloud.iot.dtos.payload.request.SignupRequest;
 import com.shd.cloud.iot.dtos.payload.response.MessageResponse;
 import com.shd.cloud.iot.models.ERole;
@@ -74,8 +78,13 @@ public class UserService {
         }
         user.setToken(tokenGenerator());
         user.setRoles(roles);
-        userRepository.save(user);
-        return ResponseEntity.ok(new MessageResponse("user created successfully!"));
+
+        return ResponseEntity.ok(userRepository.save(user));
+    }
+
+    public Optional<User> get(Long user_id) {
+        Optional<User> user = userRepository.findById(user_id);
+        return user;
     }
 
     private String tokenGenerator() {
