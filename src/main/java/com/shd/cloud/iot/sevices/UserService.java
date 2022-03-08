@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import net.bytebuddy.utility.RandomString;
+
 @Service
 public class UserService {
 
@@ -70,9 +72,18 @@ public class UserService {
                 }
             });
         }
+        user.setToken(tokenGenerator());
         user.setRoles(roles);
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("user created successfully!"));
+    }
+
+    private String tokenGenerator() {
+        String t = RandomString.make(32);
+        while (userRepository.existsByToken(t)) {
+            t = RandomString.make(32);
+        }
+        return t;
     }
 
 }
