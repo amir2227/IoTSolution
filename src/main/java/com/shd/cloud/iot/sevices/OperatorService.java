@@ -4,11 +4,12 @@ import java.util.Optional;
 
 import com.shd.cloud.iot.dtos.OperatorDto;
 import com.shd.cloud.iot.dtos.payload.response.MessageResponse;
+import com.shd.cloud.iot.exception.DuplicatException;
+import com.shd.cloud.iot.exception.NotFoundException;
 import com.shd.cloud.iot.models.Location;
 import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.User;
 import com.shd.cloud.iot.repositorys.OperatorRepository;
-import com.shd.cloud.iot.repositorys.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,24 +27,19 @@ public class OperatorService {
     @Autowired
     private UserService userService;
 
-    public ResponseEntity<?> create(OperatorDto dto) {
-        Optional<User> user = userService.get(dto.getUser_id());
-        if (!user.isPresent()) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("user with id " + dto.getUser_id() + " Not Found!"));
+    public Operator create(OperatorDto dto, String username) {
+        User user = userService.getByUsername(username);
+        if (operatorRepository.existsByNameAndUser_id(dto.getName(), user.getId())) {
+            throw new DuplicatException(dto.getName() + " with user id " + user.getId());
         }
-
-        Operator operator = new Operator(dto.getName(), false, dto.getType());
+        Operator operator = new Operator(dto.getName(), dto.getState(), dto.getType());
         if (dto.getLocation_id() != null) {
-            Optional<Location> loc = locationService.get(dto.getLocation_id());
-            if (!loc.isPresent()) {
-                return ResponseEntity.badRequest()
-                        .body(new MessageResponse("location with id " + dto.getLocation_id() + " Not Found!"));
-            }
-            operator.setLocation(loc.get());
+            Location loc = locationService.get(dto.getLocation_id())
+                    .orElseThrow(() -> new NotFoundException("location Not Found with id " + dto.getLocation_id()));
+            operator.setLocation(loc);
         }
-        operator.setUser(user.get());
+        operator.setUser(user);
 
-        return ResponseEntity.ok(operatorRepository.save(operator));
+        return operatorRepository.save(operator);
     }
 }

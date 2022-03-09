@@ -1,27 +1,25 @@
 package com.shd.cloud.iot.dtos;
 
-import javax.validation.constraints.Min;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-public class OperatorDto {
+public class SensorDto {
 
     @NotBlank
     @Size(min = 3, max = 20)
     private String name;
 
-    @NotNull
-    private Boolean state;
-
     @NotBlank
-    @Size(max = 20)
+    @Max(20)
     private String type;
 
-    @Min(1)
+    @NotBlank
+    private Long user_id;
+
     private Long location_id;
 
-    public OperatorDto() {
+    public SensorDto() {
     }
 
     public String getName() {
@@ -32,20 +30,20 @@ public class OperatorDto {
         this.name = name;
     }
 
-    public Boolean getState() {
-        return state;
-    }
-
-    public void setState(Boolean state) {
-        this.state = state;
-    }
-
     public String getType() {
         return type;
     }
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Long getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(Long user_id) {
+        this.user_id = user_id;
     }
 
     public Long getLocation_id() {

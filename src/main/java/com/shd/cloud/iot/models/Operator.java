@@ -10,11 +10,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.persistence.GenerationType;
 
 @Entity
-@Table(name = "operators")
+@Table(name = "operators", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "user_id", "name" })
+})
 public class Operator {
 
     @Id

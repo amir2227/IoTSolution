@@ -3,12 +3,10 @@ package com.shd.cloud.iot.sevices;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.ws.rs.BadRequestException;
-
-import java.util.Optional;
-
 import com.shd.cloud.iot.dtos.payload.request.SignupRequest;
 import com.shd.cloud.iot.dtos.payload.response.MessageResponse;
+import com.shd.cloud.iot.exception.DuplicatException;
+import com.shd.cloud.iot.exception.NotFoundException;
 import com.shd.cloud.iot.models.ERole;
 import com.shd.cloud.iot.models.Role;
 import com.shd.cloud.iot.models.User;
@@ -17,6 +15,7 @@ import com.shd.cloud.iot.repositorys.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,22 +31,12 @@ public class UserService {
     @Autowired
     private PasswordEncoder encoder;
 
-    public ResponseEntity<?> create(SignupRequest signUpRequest) {
-        // if (errors.hasErrors()) {
-        // return ResponseEntity.badRequest()
-        // .body(errors.getAllErrors().stream()
-        // .map((err) -> err.getArguments().toString() + ": " +
-        // err.getDefaultMessage()));
-        // }
+    public User create(SignupRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+            throw new DuplicatException("Username");
         }
         if (userRepository.existsByPhone(signUpRequest.getPhone())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Phone is already in use!"));
+            throw new DuplicatException("Phone");
         }
         // Create new user's account
 
@@ -79,11 +68,18 @@ public class UserService {
         user.setToken(tokenGenerator());
         user.setRoles(roles);
 
-        return ResponseEntity.ok(userRepository.save(user));
+        return userRepository.save(user);
     }
 
-    public Optional<User> get(Long user_id) {
-        Optional<User> user = userRepository.findById(user_id);
+    public User get(Long user_id) throws UsernameNotFoundException {
+        User user = userRepository.findById(user_id)
+                .orElseThrow(() -> new NotFoundException("User Not Found with id" + user_id));
+        return user;
+    }
+
+    public User getByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User Not Found with username" + username));
         return user;
     }
 

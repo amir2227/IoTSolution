@@ -1,9 +1,7 @@
 package com.shd.cloud.iot.dtos;
 
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class LocationDto {
