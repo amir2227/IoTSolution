@@ -8,7 +8,6 @@ import com.shd.cloud.iot.dtos.payload.request.LoginRequest;
 import com.shd.cloud.iot.dtos.payload.request.SignupRequest;
 import com.shd.cloud.iot.dtos.payload.response.JwtResponse;
 import com.shd.cloud.iot.exception.handleValidationExceptions;
-import com.shd.cloud.iot.models.User;
 import com.shd.cloud.iot.security.jwt.JwtUtils;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.UserService;

@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.shd.cloud.iot.dtos.payload.request.SignupRequest;
-import com.shd.cloud.iot.dtos.payload.response.MessageResponse;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
 import com.shd.cloud.iot.models.ERole;
@@ -14,7 +13,6 @@ import com.shd.cloud.iot.repositorys.RoleRepository;
 import com.shd.cloud.iot.repositorys.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
