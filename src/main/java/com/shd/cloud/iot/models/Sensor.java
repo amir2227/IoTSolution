@@ -1,5 +1,6 @@
 package com.shd.cloud.iot.models;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -14,11 +15,14 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "sensors", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "user_id", "name" })
 })
-public class Sensor {
+@JsonIgnoreProperties(value = { "histories", "relations", "user" })
+public class Sensor implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

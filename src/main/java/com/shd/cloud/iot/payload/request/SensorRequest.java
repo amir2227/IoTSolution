@@ -1,6 +1,5 @@
 package com.shd.cloud.iot.payload.request;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -11,11 +10,8 @@ public class SensorRequest {
     private String name;
 
     @NotBlank
-    @Max(20)
+    @Size(max = 20)
     private String type;
-
-    @NotBlank
-    private Long user_id;
 
     private Long location_id;
 
@@ -36,14 +32,6 @@ public class SensorRequest {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public Long getUser_id() {
-        return user_id;
-    }
-
-    public void setUser_id(Long user_id) {
-        this.user_id = user_id;
     }
 
     public Long getLocation_id() {

@@ -27,6 +27,7 @@ public class OperatorService {
 
     public Operator create(OperatorRequest dto, Long user_id) {
         User user = userService.get(user_id);
+        System.out.println(user);
         if (operatorRepository.existsByNameAndUser_id(dto.getName(), user.getId())) {
             throw new DuplicatException(dto.getName() + " with user id " + user.getId());
         }
@@ -38,7 +39,13 @@ public class OperatorService {
         }
         operator.setUser(user);
 
-        return operatorRepository.save(operator);
+        try {
+            Operator result = operatorRepository.save(operator);
+            return result;
+        } catch (Exception e) {
+            throw new NotFoundException(e.getMessage());
+        }
+
     }
 
     public Operator get(Long id) {
@@ -47,12 +54,15 @@ public class OperatorService {
     }
 
     public List<Operator> getAllByUser(Long user_id) {
-        userService.get(user_id);
-        return operatorRepository.findByUser_id(user_id);
+        // userService.get(user_id);
+        System.out.println("amir");
+        List<Operator> l = operatorRepository.findByUser_id(user_id);
+        System.out.println();
+        return l;
     }
 
     public Operator getOneByUser(Long id, Long user_id) {
-        userService.get(user_id);
+        // userService.get(user_id);
         return operatorRepository.findByIdAndUser_id(id, user_id)
                 .orElseThrow(() -> new NotFoundException("Operator Not Found or Not this user operator"));
     }

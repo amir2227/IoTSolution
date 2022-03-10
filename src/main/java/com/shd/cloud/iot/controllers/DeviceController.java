@@ -1,5 +1,7 @@
 package com.shd.cloud.iot.controllers;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import com.shd.cloud.iot.exception.handleValidationExceptions;
@@ -7,6 +9,7 @@ import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.Sensor;
 import com.shd.cloud.iot.payload.request.OperatorRequest;
 import com.shd.cloud.iot.payload.request.SensorRequest;
+import com.shd.cloud.iot.payload.response.UserDeviceResponse;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.OperatorService;
 import com.shd.cloud.iot.sevices.SensorService;
@@ -43,8 +46,9 @@ public class DeviceController extends handleValidationExceptions {
     public ResponseEntity<?> createSensor(@Valid @RequestBody SensorRequest body) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        Sensor sensor = sensorService.create(body, userDetails.getId());
-        return ResponseEntity.ok(sensor);
+        return ResponseEntity.ok(sensorService.create(body, userDetails.getId()));
+
+        // return ResponseEntity.ok(body);
 
     }
 
@@ -54,5 +58,16 @@ public class DeviceController extends handleValidationExceptions {
                 .getPrincipal();
         System.out.println(userDetails.getId());
         return ResponseEntity.ok(userDetails);
+    }
+
+    @GetMapping("")
+    public ResponseEntity<?> getUserDevices() {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        List<Operator> operators = operatorService.getAllByUser(Long.valueOf(userDetails.getId()));
+        System.out.println(operators);
+        List<Sensor> sensors = sensorService.getAllByUser(userDetails.getId());
+
+        return ResponseEntity.ok(new UserDeviceResponse(operators, sensors));
     }
 }
