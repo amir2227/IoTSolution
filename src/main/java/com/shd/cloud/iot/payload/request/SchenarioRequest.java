@@ -1,9 +1,9 @@
-package com.shd.cloud.iot.dtos;
+package com.shd.cloud.iot.payload.request;
 
 import com.shd.cloud.iot.models.EConditions;
 import com.shd.cloud.iot.validator.ValidateString;
 
-public class Schenario {
+public class SchenarioRequest {
     // if sensor_id smaller than 50 then operator_id must be on
 
     private Long sensor_id;
@@ -17,7 +17,7 @@ public class Schenario {
 
     private Boolean operator_state;
 
-    public Schenario() {
+    public SchenarioRequest() {
     }
 
     public Long getSensor_id() {

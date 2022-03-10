@@ -1,4 +1,4 @@
-package com.shd.cloud.iot.dtos.payload.request;
+package com.shd.cloud.iot.payload.request;
 
 import java.util.Set;
 

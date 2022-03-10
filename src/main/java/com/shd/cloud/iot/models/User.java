@@ -1,6 +1,7 @@
 package com.shd.cloud.iot.models;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -40,6 +42,12 @@ public class User {
 
     @NotBlank
     private String token;
+
+    @OneToMany(mappedBy = "user")
+    private List<Sensor> sensors;
+
+    @OneToMany(mappedBy = "user")
+    private List<Operator> operators;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable
@@ -110,6 +118,22 @@ public class User {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public List<Sensor> getSensors() {
+        return sensors;
+    }
+
+    public void setSensors(List<Sensor> sensors) {
+        this.sensors = sensors;
+    }
+
+    public List<Operator> getOperators() {
+        return operators;
+    }
+
+    public void setOperators(List<Operator> operators) {
+        this.operators = operators;
     }
 
     @Override

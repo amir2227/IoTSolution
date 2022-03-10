@@ -1,20 +1,20 @@
-package com.shd.cloud.iot.dtos.payload.request;
+package com.shd.cloud.iot.payload.request;
 
 import javax.validation.constraints.NotBlank;
 
 public class LoginRequest {
     @NotBlank
-    private String username;
+    private String phone;
 
     @NotBlank
     private String password;
 
-    public String getUsername() {
-        return username;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getPassword() {

@@ -3,12 +3,12 @@ package com.shd.cloud.iot.sevices;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.shd.cloud.iot.dtos.payload.request.SignupRequest;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
 import com.shd.cloud.iot.models.ERole;
 import com.shd.cloud.iot.models.Role;
 import com.shd.cloud.iot.models.User;
+import com.shd.cloud.iot.payload.request.SignupRequest;
 import com.shd.cloud.iot.repositorys.RoleRepository;
 import com.shd.cloud.iot.repositorys.UserRepository;
 

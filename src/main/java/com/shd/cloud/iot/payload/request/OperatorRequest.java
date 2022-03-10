@@ -1,11 +1,11 @@
-package com.shd.cloud.iot.dtos;
+package com.shd.cloud.iot.payload.request;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-public class OperatorDto {
+public class OperatorRequest {
 
     @NotBlank
     @Size(min = 3, max = 20)
@@ -21,7 +21,7 @@ public class OperatorDto {
     @Min(1)
     private Long location_id;
 
-    public OperatorDto() {
+    public OperatorRequest() {
     }
 
     public String getName() {

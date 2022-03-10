@@ -1,4 +1,4 @@
-package com.shd.cloud.iot.dtos.payload.response;
+package com.shd.cloud.iot.payload.response;
 
 import java.util.List;
 

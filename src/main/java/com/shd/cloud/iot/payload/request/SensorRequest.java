@@ -1,10 +1,10 @@
-package com.shd.cloud.iot.dtos;
+package com.shd.cloud.iot.payload.request;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-public class SensorDto {
+public class SensorRequest {
 
     @NotBlank
     @Size(min = 3, max = 20)
@@ -19,7 +19,7 @@ public class SensorDto {
 
     private Long location_id;
 
-    public SensorDto() {
+    public SensorRequest() {
     }
 
     public String getName() {

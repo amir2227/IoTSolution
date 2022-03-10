@@ -11,10 +11,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "sensors")
+@Table(name = "sensors", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "user_id", "name" })
+})
 public class Sensor {
 
     @Id
@@ -38,6 +41,10 @@ public class Sensor {
 
     @OneToMany(mappedBy = "sensor")
     private List<OperatorSensor> relations;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public Sensor() {
     }
@@ -93,6 +100,14 @@ public class Sensor {
 
     public void setRelations(List<OperatorSensor> relations) {
         this.relations = relations;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
 }

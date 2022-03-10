@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 
-import com.shd.cloud.iot.dtos.payload.request.LoginRequest;
-import com.shd.cloud.iot.dtos.payload.request.SignupRequest;
-import com.shd.cloud.iot.dtos.payload.response.JwtResponse;
 import com.shd.cloud.iot.exception.handleValidationExceptions;
+import com.shd.cloud.iot.payload.request.LoginRequest;
+import com.shd.cloud.iot.payload.request.SignupRequest;
+import com.shd.cloud.iot.payload.response.JwtResponse;
 import com.shd.cloud.iot.security.jwt.JwtUtils;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.UserService;
@@ -38,7 +38,7 @@ public class AuthController extends handleValidationExceptions {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.getPhone(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 

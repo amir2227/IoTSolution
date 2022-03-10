@@ -2,9 +2,9 @@ package com.shd.cloud.iot.sevices;
 
 import java.util.Optional;
 
-import com.shd.cloud.iot.dtos.LocationDto;
-import com.shd.cloud.iot.dtos.payload.response.MessageResponse;
 import com.shd.cloud.iot.models.Location;
+import com.shd.cloud.iot.payload.request.LocationRequest;
+import com.shd.cloud.iot.payload.response.MessageResponse;
 import com.shd.cloud.iot.repositorys.LocationRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public class LocationService {
     @Autowired
     private LocationRepository locationRepository;
 
-    public ResponseEntity<?> create(LocationDto dto) {
+    public ResponseEntity<?> create(LocationRequest dto) {
         Location location = new Location(dto.getName(), dto.getType());
         if (dto.getParent_id() != null) {
             Optional<Location> parent = this.get(dto.getParent_id());
