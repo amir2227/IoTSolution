@@ -3,6 +3,7 @@ package com.shd.cloud.iot.exception.advice;
 import java.util.Date;
 
 import com.shd.cloud.iot.exception.ErrorMessage;
+import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
 
@@ -29,6 +30,16 @@ public class ControllerAdvice {
   public ErrorMessage handleUserNotFoundException(NotFoundException ex, WebRequest request) {
     return new ErrorMessage(
         HttpStatus.NOT_FOUND.value(),
+        new Date(),
+        ex.getMessage(),
+        request.getDescription(false));
+  }
+
+  @ExceptionHandler(value = BadRequestException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorMessage handleUserBadRequestException(BadRequestException ex, WebRequest request) {
+    return new ErrorMessage(
+        HttpStatus.BAD_REQUEST.value(),
         new Date(),
         ex.getMessage(),
         request.getDescription(false));

@@ -38,13 +38,7 @@ public class OperatorService {
             operator.setLocation(loc);
         }
         operator.setUser(user);
-
-        try {
-            Operator result = operatorRepository.save(operator);
-            return result;
-        } catch (Exception e) {
-            throw new NotFoundException(e.getMessage());
-        }
+        return operatorRepository.save(operator);
 
     }
 
@@ -55,9 +49,7 @@ public class OperatorService {
 
     public List<Operator> getAllByUser(Long user_id) {
         // userService.get(user_id);
-        System.out.println("amir");
         List<Operator> l = operatorRepository.findByUser_id(user_id);
-        System.out.println();
         return l;
     }
 

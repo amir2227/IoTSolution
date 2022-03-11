@@ -13,12 +13,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.GenerationType;
 
 @Entity
 @Table(name = "operators", uniqueConstraints = { @UniqueConstraint(columnNames = { "user_id", "name" }) })
+@JsonIgnoreProperties(value = { "histories", "user" })
 public class Operator {
 
     @Id
@@ -49,7 +50,6 @@ public class Operator {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnore
     private User user;
 
     public Operator() {

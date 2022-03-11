@@ -9,6 +9,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "sensor_history")
 public class SensorHistory {
@@ -21,8 +23,9 @@ public class SensorHistory {
     private String data;
 
     @Column
-    private Integer updated_at;
+    private Long updated_at;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "sensor_id")
     private Sensor sensor;
@@ -30,7 +33,7 @@ public class SensorHistory {
     public SensorHistory() {
     }
 
-    public SensorHistory(String data, Integer updated_at, Sensor sensor) {
+    public SensorHistory(String data, Long updated_at, Sensor sensor) {
         this.data = data;
         this.updated_at = updated_at;
         this.sensor = sensor;
@@ -52,11 +55,11 @@ public class SensorHistory {
         this.data = data;
     }
 
-    public Integer getUpdated_at() {
+    public Long getUpdated_at() {
         return updated_at;
     }
 
-    public void setUpdated_at(Integer updated_at) {
+    public void setUpdated_at(Long updated_at) {
         this.updated_at = updated_at;
     }
 

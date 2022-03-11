@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "sensors", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "user_id", "name" })
 })
-@JsonIgnoreProperties(value = { "histories", "relations", "user" })
+@JsonIgnoreProperties(value = { "histories", "user" })
 public class Sensor implements Serializable {
 
     @Id
