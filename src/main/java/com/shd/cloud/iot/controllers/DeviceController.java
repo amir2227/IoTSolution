@@ -1,10 +1,7 @@
 package com.shd.cloud.iot.controllers;
 
-import java.util.List;
-
 import com.shd.cloud.iot.exception.handleValidationExceptions;
 import com.shd.cloud.iot.models.SensorHistory;
-import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.OperatorService;
@@ -30,12 +27,6 @@ public class DeviceController extends handleValidationExceptions {
     @Autowired
     private SensorService sensorService;
 
-    @GetMapping("sensor/{id}")
-    public ResponseEntity<?> getDeviceHistory(@PathVariable("id") Long id, @RequestBody SearchRequest sRequest) {
-        List<SensorHistory> sh = sensorService.searchHistory(id, sRequest);
-        return ResponseEntity.ok(sh);
-    }
-
     @PostMapping("sensor/{id}")
     public ResponseEntity<?> createDeviceHistory(@PathVariable("id") Long id,
             @RequestBody SensorHistoryRequest request) {
@@ -44,7 +35,7 @@ public class DeviceController extends handleValidationExceptions {
         return ResponseEntity.ok(sh);
     }
 
-    @GetMapping("/operator/{id}")
+    @GetMapping("/operator/{id}/{token}")
     public ResponseEntity<?> getOneOperator(@PathVariable("id") Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();

@@ -7,6 +7,7 @@ import com.shd.cloud.iot.exception.handleValidationExceptions;
 import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.Sensor;
 import com.shd.cloud.iot.models.SensorHistory;
+import com.shd.cloud.iot.payload.request.EditOperator;
 import com.shd.cloud.iot.payload.request.OperatorRequest;
 import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.payload.request.SensorRequest;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,6 +56,32 @@ public class UserDeviceController extends handleValidationExceptions {
 
     }
 
+    @GetMapping("/operator")
+    public ResponseEntity<?> getAllOperator() {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        List<Operator> operators = operatorService.getAllByUser(userDetails.getId());
+        return ResponseEntity.ok(operators);
+
+    }
+
+    @PatchMapping("/operator/{id}")
+    public ResponseEntity<?> EditOperator(@PathVariable("id") Long id, @Valid @RequestBody EditOperator body) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        Operator operator = operatorService.Edit(body, id, userDetails.getId());
+        return ResponseEntity.ok(operator);
+
+    }
+
+    @GetMapping("/operator/{id}")
+    public ResponseEntity<?> getOneOperator(@PathVariable("id") Long id) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+
+        return ResponseEntity.ok(operatorService.getOneByUser(id, userDetails.getId()));
+    }
+
     @PostMapping("/sensor")
     public ResponseEntity<?> createSensor(@Valid @RequestBody SensorRequest body) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
@@ -66,14 +94,6 @@ public class UserDeviceController extends handleValidationExceptions {
     public ResponseEntity<?> getDeviceHistory(@PathVariable("id") Long id, @Valid SearchRequest sRequest) {
         List<SensorHistory> sh = sensorService.searchHistory(id, sRequest);
         return ResponseEntity.ok(new SearchResponse(sh, sh.size()));
-    }
-
-    @GetMapping("/operator/{id}")
-    public ResponseEntity<?> getOneOperator(@PathVariable("id") Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-
-        return ResponseEntity.ok(operatorService.getOneByUser(id, userDetails.getId()));
     }
 
 }

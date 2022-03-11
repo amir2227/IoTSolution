@@ -7,6 +7,7 @@ import com.shd.cloud.iot.exception.NotFoundException;
 import com.shd.cloud.iot.models.Location;
 import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.User;
+import com.shd.cloud.iot.payload.request.EditOperator;
 import com.shd.cloud.iot.payload.request.OperatorRequest;
 import com.shd.cloud.iot.repositorys.OperatorRepository;
 
@@ -33,13 +34,32 @@ public class OperatorService {
         }
         Operator operator = new Operator(dto.getName(), dto.getState(), dto.getType());
         if (dto.getLocation_id() != null) {
-            Location loc = locationService.get(dto.getLocation_id())
-                    .orElseThrow(() -> new NotFoundException("location Not Found with id " + dto.getLocation_id()));
+            Location loc = locationService.get(dto.getLocation_id());
             operator.setLocation(loc);
         }
         operator.setUser(user);
         return operatorRepository.save(operator);
 
+    }
+
+    public Operator Edit(EditOperator dto, Long id, Long user_id) {
+        Operator operator = operatorRepository.findByIdAndUser_id(id, user_id)
+                .orElseThrow(() -> new NotFoundException("operator Not Found with id: " + id));
+        if (dto.getState() != null) {
+            operator.setState(dto.getState());
+        }
+        if (dto.getName() != null) {
+            operator.setName(dto.getName());
+        }
+        if (dto.getType() != null) {
+            operator.setType(dto.getType());
+        }
+        if (dto.getLocation_id() != null) {
+            Location location = locationService.get(dto.getLocation_id());
+            operator.setLocation(location);
+        }
+
+        return operatorRepository.save(operator);
     }
 
     public Operator get(Long id) {

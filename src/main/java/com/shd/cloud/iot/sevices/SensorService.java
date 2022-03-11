@@ -17,7 +17,6 @@ import com.shd.cloud.iot.repositorys.SensorHistoryRepository;
 import com.shd.cloud.iot.repositorys.SensorRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,8 +41,7 @@ public class SensorService {
         }
         Sensor sensor = new Sensor(dto.getName(), dto.getName());
         if (dto.getLocation_id() != null) {
-            Location loc = locationService.get(dto.getLocation_id())
-                    .orElseThrow(() -> new NotFoundException("Location Not Found with id " + dto.getLocation_id()));
+            Location loc = locationService.get(dto.getLocation_id());
             sensor.setLocation(loc);
         }
         sensor.setUser(user);
