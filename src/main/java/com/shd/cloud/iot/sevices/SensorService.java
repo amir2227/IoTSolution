@@ -10,6 +10,7 @@ import com.shd.cloud.iot.models.Location;
 import com.shd.cloud.iot.models.Sensor;
 import com.shd.cloud.iot.models.SensorHistory;
 import com.shd.cloud.iot.models.User;
+import com.shd.cloud.iot.payload.request.EditSensorRequest;
 import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
 import com.shd.cloud.iot.payload.request.SensorRequest;
@@ -51,13 +52,13 @@ public class SensorService {
 
     public Sensor get(Long id) {
         return sensorRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Sensor Not Found with id " + id));
+                .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
     public Sensor getOneByUser(Long id, Long user_id) {
         userService.get(user_id);
         return sensorRepository.findByIdAndUser_id(id, user_id)
-                .orElseThrow(() -> new NotFoundException("Sensor Not Found or Not this user operator"));
+                .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
     public List<Sensor> getAllByUser(Long user_id) {
@@ -65,9 +66,32 @@ public class SensorService {
         return sensorRepository.findByUser_id(user_id);
     }
 
-    public void delete(Long id, Long user_id) {
+    public Sensor Edit(EditSensorRequest dto, Long id, Long user_id) {
         Sensor sensor = this.getOneByUser(id, user_id);
-        sensorRepository.delete(sensor);
+        if (dto.getName() != null) {
+            sensor.setName(dto.getName());
+        }
+        if (dto.getType() != null) {
+            sensor.setType(dto.getType());
+        }
+        if (dto.getLocation_id() != null) {
+            if (!dto.getLocation_id().equals(sensor.getLocation().getId())) {
+                Location location = locationService.get(dto.getLocation_id());
+                sensor.setLocation(location);
+            }
+        }
+        return sensorRepository.save(sensor);
+
+    }
+
+    public String delete(Long id, Long user_id) {
+        Sensor sensor = this.getOneByUser(id, user_id);
+        try {
+            sensorRepository.delete(sensor);
+            return "sensor with id " + id + " successfully deleted";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
 
     }
 

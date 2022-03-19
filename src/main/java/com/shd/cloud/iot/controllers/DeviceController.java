@@ -3,12 +3,10 @@ package com.shd.cloud.iot.controllers;
 import com.shd.cloud.iot.exception.handleValidationExceptions;
 import com.shd.cloud.iot.models.SensorHistory;
 import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
-import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.OperatorService;
 import com.shd.cloud.iot.sevices.SensorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,11 +34,10 @@ public class DeviceController extends handleValidationExceptions {
     }
 
     @GetMapping("/operator/{id}/{token}")
-    public ResponseEntity<?> getOneOperator(@PathVariable("id") Long id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
+    public ResponseEntity<?> getOneOperator(@PathVariable("id") Long id,
+            @PathVariable("token") String token) {
 
-        return ResponseEntity.ok(operatorService.getOneByUser(id, userDetails.getId()));
+        return ResponseEntity.ok(operatorService.getByToken(id, token));
     }
 
 }

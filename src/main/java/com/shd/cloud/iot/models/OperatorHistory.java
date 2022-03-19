@@ -9,6 +9,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "operator_history")
 public class OperatorHistory {
@@ -21,8 +23,9 @@ public class OperatorHistory {
     private Boolean state;
 
     @Column
-    private Integer updated_at;
+    private Long updated_at;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "operator_id")
     private Operator operator;
@@ -30,7 +33,7 @@ public class OperatorHistory {
     public OperatorHistory() {
     }
 
-    public OperatorHistory(Boolean state, Integer updated_at, Operator operator) {
+    public OperatorHistory(Boolean state, long updated_at, Operator operator) {
         this.state = state;
         this.updated_at = updated_at;
         this.operator = operator;
@@ -52,11 +55,11 @@ public class OperatorHistory {
         this.state = state;
     }
 
-    public Integer getUpdated_at() {
+    public Long getUpdated_at() {
         return updated_at;
     }
 
-    public void setUpdated_at(Integer updated_at) {
+    public void setUpdated_at(Long updated_at) {
         this.updated_at = updated_at;
     }
 
