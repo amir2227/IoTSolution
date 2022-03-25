@@ -1,9 +1,11 @@
 package com.shd.cloud.iot.models;
 
-public enum EConditions {
+public enum EModality {
     SMALLER,
     GREATER,
     BETWEEN,
-    EQUAL
+    EQUAL,
+    ON,
+    OFF
 
 }

@@ -12,8 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "operator_sensor")
-public class OperatorSensor {
+@Table(name = "scenario")
+public class Scenario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,15 +22,19 @@ public class OperatorSensor {
     @Column(length = 30)
     private String name;
 
-    @Column(length = 20)
-    private String type;
+    @Column()
+    private Boolean operator_state;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private EConditions modality;
+    private EModality modality;
 
     @Column(length = 30)
     private String points;
+
+    @ManyToOne
+    @JoinColumn(name = "operator2_id")
+    private Operator operator2;
 
     @ManyToOne
     @JoinColumn(name = "operator_id")
@@ -40,7 +44,7 @@ public class OperatorSensor {
     @JoinColumn(name = "sensor_id")
     private Sensor sensor;
 
-    public OperatorSensor() {
+    public Scenario() {
     }
 
     public Long getId() {
@@ -59,19 +63,19 @@ public class OperatorSensor {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public Boolean getOperator_state() {
+        return operator_state;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setOperator_state(Boolean operator_state) {
+        this.operator_state = operator_state;
     }
 
-    public EConditions getModality() {
+    public EModality getModality() {
         return modality;
     }
 
-    public void setModality(EConditions modality) {
+    public void setModality(EModality modality) {
         this.modality = modality;
     }
 
@@ -89,6 +93,14 @@ public class OperatorSensor {
 
     public void setOperator(Operator operator) {
         this.operator = operator;
+    }
+
+    public Operator getOperator2() {
+        return operator2;
+    }
+
+    public void setOperator2(Operator operator2) {
+        this.operator2 = operator2;
     }
 
     public Sensor getSensor() {

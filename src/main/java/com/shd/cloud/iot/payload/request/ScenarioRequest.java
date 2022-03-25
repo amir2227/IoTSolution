@@ -1,23 +1,25 @@
 package com.shd.cloud.iot.payload.request;
 
-import com.shd.cloud.iot.models.EConditions;
+import com.shd.cloud.iot.models.EModality;
 import com.shd.cloud.iot.validator.ValidateString;
 
-public class SchenarioRequest {
-    // if sensor_id smaller than 50 then operator_id must be on
+public class ScenarioRequest {
+    // if sensor smaller than 50 then operator must be on
 
     private Long sensor_id;
 
     private Long operator_id;
 
-    @ValidateString(acceptedValues = { "SMALLER", "GREATER", "BETWEEN", "EQUAL" })
-    private EConditions condition;
+    private Long operator2_id;
+
+    @ValidateString(acceptedValues = { "SMALLER", "GREATER", "BETWEEN", "EQUAL", "ON", "OFF" })
+    private EModality modality;
 
     private Float[] points;
 
     private Boolean operator_state;
 
-    public SchenarioRequest() {
+    public ScenarioRequest() {
     }
 
     public Long getSensor_id() {
@@ -36,12 +38,20 @@ public class SchenarioRequest {
         this.operator_id = operator_id;
     }
 
-    public EConditions getCondition() {
-        return condition;
+    public Long getOperator2_id() {
+        return operator2_id;
     }
 
-    public void setCondition(EConditions condition) {
-        this.condition = condition;
+    public void setOperator2_id(Long operator2_id) {
+        this.operator2_id = operator2_id;
+    }
+
+    public EModality getModality() {
+        return modality;
+    }
+
+    public void setModality(EModality modality) {
+        this.modality = modality;
     }
 
     public Float[] getPoints() {

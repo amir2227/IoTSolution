@@ -15,6 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -43,8 +44,9 @@ public class Sensor implements Serializable {
     @OneToMany(mappedBy = "sensor")
     private List<SensorHistory> histories;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "sensor")
-    private List<OperatorSensor> relations;
+    private List<Scenario> scenarios;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -98,12 +100,12 @@ public class Sensor implements Serializable {
         this.histories = histories;
     }
 
-    public List<OperatorSensor> getRelations() {
-        return relations;
+    public List<Scenario> getScenarios() {
+        return scenarios;
     }
 
-    public void setRelations(List<OperatorSensor> relations) {
-        this.relations = relations;
+    public void setScenarios(List<Scenario> scenarios) {
+        this.scenarios = scenarios;
     }
 
     public User getUser() {

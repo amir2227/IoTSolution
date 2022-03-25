@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.GenerationType;
@@ -41,8 +42,9 @@ public class Operator {
     @OneToMany(mappedBy = "operator")
     private List<OperatorHistory> histories;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "operator")
-    private List<OperatorSensor> relations;
+    private List<Scenario> scenarios;
 
     @ManyToOne
     @JoinColumn(name = "location_id")
@@ -109,12 +111,12 @@ public class Operator {
         this.histories = histories;
     }
 
-    public List<OperatorSensor> getRelations() {
-        return relations;
+    public List<Scenario> getScenarios() {
+        return scenarios;
     }
 
-    public void setRelations(List<OperatorSensor> relations) {
-        this.relations = relations;
+    public void setSenarios(List<Scenario> scenarios) {
+        this.scenarios = scenarios;
     }
 
     public User getUser() {
