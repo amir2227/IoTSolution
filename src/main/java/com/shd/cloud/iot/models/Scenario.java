@@ -1,14 +1,13 @@
 package com.shd.cloud.iot.models;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -22,29 +21,19 @@ public class Scenario {
     @Column(length = 30)
     private String name;
 
-    @Column()
-    private Boolean operator_state;
+    @OneToMany(mappedBy = "scenario")
+    private List<ScenarioOperators> target_operators;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private EModality modality;
-
-    @Column(length = 30)
-    private String points;
-
-    @ManyToOne
-    @JoinColumn(name = "operator2_id")
-    private Operator operator2;
-
-    @ManyToOne
-    @JoinColumn(name = "operator_id")
-    private Operator operator;
-
-    @ManyToOne
-    @JoinColumn(name = "sensor_id")
-    private Sensor sensor;
+    @OneToMany(mappedBy = "scenario")
+    private List<ScenarioSensors> effective_sensors;
 
     public Scenario() {
+    }
+
+    public Scenario(String name, List<ScenarioOperators> target_operators, List<ScenarioSensors> effective_sensors) {
+        this.name = name;
+        this.target_operators = target_operators;
+        this.effective_sensors = effective_sensors;
     }
 
     public Long getId() {
@@ -63,52 +52,20 @@ public class Scenario {
         this.name = name;
     }
 
-    public Boolean getOperator_state() {
-        return operator_state;
+    public List<ScenarioOperators> getTarget_operators() {
+        return target_operators;
     }
 
-    public void setOperator_state(Boolean operator_state) {
-        this.operator_state = operator_state;
+    public void setTarget_operators(List<ScenarioOperators> target_operators) {
+        this.target_operators = target_operators;
     }
 
-    public EModality getModality() {
-        return modality;
+    public List<ScenarioSensors> getEffective_sensors() {
+        return effective_sensors;
     }
 
-    public void setModality(EModality modality) {
-        this.modality = modality;
-    }
-
-    public String getPoints() {
-        return points;
-    }
-
-    public void setPoints(String points) {
-        this.points = points;
-    }
-
-    public Operator getOperator() {
-        return operator;
-    }
-
-    public void setOperator(Operator operator) {
-        this.operator = operator;
-    }
-
-    public Operator getOperator2() {
-        return operator2;
-    }
-
-    public void setOperator2(Operator operator2) {
-        this.operator2 = operator2;
-    }
-
-    public Sensor getSensor() {
-        return sensor;
-    }
-
-    public void setSensor(Sensor sensor) {
-        this.sensor = sensor;
+    public void setEffective_sensors(List<ScenarioSensors> effective_sensors) {
+        this.effective_sensors = effective_sensors;
     }
 
 }

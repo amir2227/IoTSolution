@@ -9,7 +9,7 @@ import com.shd.cloud.iot.models.EModality;
 import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.Scenario;
 import com.shd.cloud.iot.models.Sensor;
-import com.shd.cloud.iot.payload.request.ScenarioRequest;
+import com.shd.cloud.iot.payload.request.scenarioRequest.ScenarioRequest;
 import com.shd.cloud.iot.repositorys.ScenarioRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
