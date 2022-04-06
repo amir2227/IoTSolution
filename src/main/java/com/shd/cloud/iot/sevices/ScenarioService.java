@@ -27,66 +27,69 @@ public class ScenarioService {
     @Autowired
     private SensorService sensorService;
 
-    public List<Scenario> create(List<ScenarioRequest> dtoList, Long user_id) {
+    // public List<Scenario> create(List<ScenarioRequest> dtoList, Long user_id) {
 
-        List<Scenario> scenarios = new ArrayList<>();
-        // test for 1 object to n id
-        if (dtoList == null || dtoList.size() < 1) {
-            throw new BadRequestException("there is no scenario");
-        }
-        for (ScenarioRequest dto : dtoList) {
-            Scenario scenario = new Scenario();
-            if (dto.getOperator_id() != null) {
-                Operator operator = operatorService.get(dto.getOperator_id());
-                scenario.setOperator(operator);
-            }
-            if (dto.getSensor_id() != null) {
-                Sensor sensor = sensorService.get(dto.getSensor_id());
-                scenario.setSensor(sensor);
-            }
-            if (dto.getOperator_state() != null) {
-                scenario.setOperator_state(dto.getOperator_state());
-            }
-            if (dto.getModality() != null) {
-                scenario.setModality(dto.getModality());
-                if (dto.getOperator2_id() != null) {
-                    if (dto.getSensor_id() != null) {
-                        throw new BadRequestException("in this scenario sensor id must be null");
-                    }
-                    if (dto.getPoints() != null) {
-                        throw new BadRequestException("in this scenario points must be null");
-                    }
-                    if (dto.getModality().equals(EModality.ON) || dto.getModality().equals(EModality.OFF)) {
-                        Operator operator = operatorService.get(dto.getOperator2_id());
-                        scenario.setOperator2(operator);
-                    } else {
-                        throw new BadRequestException("modality must be ON or OFF");
-                    }
-                }
-                if (dto.getPoints() != null && dto.getPoints().length > 0) {
+    // List<Scenario> scenarios = new ArrayList<>();
+    // // test for 1 object to n id
+    // if (dtoList == null || dtoList.size() < 1) {
+    // throw new BadRequestException("there is no scenario");
+    // }
+    // for (ScenarioRequest dto : dtoList) {
+    // Scenario scenario = new Scenario();
+    // if (dto.getOperator_id() != null) {
+    // Operator operator = operatorService.get(dto.getOperator_id());
+    // scenario.setOperator(operator);
+    // }
+    // if (dto.getSensor_id() != null) {
+    // Sensor sensor = sensorService.get(dto.getSensor_id());
+    // scenario.setSensor(sensor);
+    // }
+    // if (dto.getOperator_state() != null) {
+    // scenario.se(dto.getOperator_state());
+    // }
+    // if (dto.getModality() != null) {
+    // scenario.setModality(dto.getModality());
+    // if (dto.getOperator2_id() != null) {
+    // if (dto.getSensor_id() != null) {
+    // throw new BadRequestException("in this scenario sensor id must be null");
+    // }
+    // if (dto.getPoints() != null) {
+    // throw new BadRequestException("in this scenario points must be null");
+    // }
+    // if (dto.getModality().equals(EModality.ON) ||
+    // dto.getModality().equals(EModality.OFF)) {
+    // Operator operator = operatorService.get(dto.getOperator2_id());
+    // scenario.setOperator2(operator);
+    // } else {
+    // throw new BadRequestException("modality must be ON or OFF");
+    // }
+    // }
+    // if (dto.getPoints() != null && dto.getPoints().length > 0) {
 
-                    if (dto.getModality().equals(EModality.BETWEEN)) {
-                        if (dto.getPoints().length == 2) {
-                            Arrays.sort(dto.getPoints());
-                            scenario.setPoints(dto.getPoints()[1] + "&" + dto.getPoints()[0]);
-                        } else {
-                            throw new BadRequestException("when modality is BETWEEN poinsts must have 2 value");
-                        }
-                    } else {
-                        if (dto.getPoints().length == 1) {
-                            scenario.setPoints(String.valueOf(dto.getPoints()[0]));
-                        } else {
-                            throw new BadRequestException("when modality isn't BETWEEN poinsts must have 1 value");
-                        }
-                    }
+    // if (dto.getModality().equals(EModality.BETWEEN)) {
+    // if (dto.getPoints().length == 2) {
+    // Arrays.sort(dto.getPoints());
+    // scenario.setPoints(dto.getPoints()[1] + "&" + dto.getPoints()[0]);
+    // } else {
+    // throw new BadRequestException("when modality is BETWEEN poinsts must have 2
+    // value");
+    // }
+    // } else {
+    // if (dto.getPoints().length == 1) {
+    // scenario.setPoints(String.valueOf(dto.getPoints()[0]));
+    // } else {
+    // throw new BadRequestException("when modality isn't BETWEEN poinsts must have
+    // 1 value");
+    // }
+    // }
 
-                }
-            }
-            scenarios.add(scenario);
+    // }
+    // }
+    // scenarios.add(scenario);
 
-        }
+    // }
 
-        return scenarioRepository.saveAll(scenarios);
+    // return scenarioRepository.saveAll(scenarios);
 
-    }
+    // }
 }

@@ -42,9 +42,9 @@ public class Operator {
     @OneToMany(mappedBy = "operator")
     private List<OperatorHistory> histories;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "operator")
-    private List<Scenario> scenarios;
+    // @JsonIgnore
+    // @OneToMany(mappedBy = "operator")
+    // private List<Scenario> scenarios;
 
     @ManyToOne
     @JoinColumn(name = "location_id")
@@ -111,13 +111,13 @@ public class Operator {
         this.histories = histories;
     }
 
-    public List<Scenario> getScenarios() {
-        return scenarios;
-    }
+    // public List<Scenario> getScenarios() {
+    // return scenarios;
+    // }
 
-    public void setSenarios(List<Scenario> scenarios) {
-        this.scenarios = scenarios;
-    }
+    // public void setSenarios(List<Scenario> scenarios) {
+    // this.scenarios = scenarios;
+    // }
 
     public User getUser() {
         return user;

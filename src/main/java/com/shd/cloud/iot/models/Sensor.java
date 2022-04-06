@@ -44,9 +44,9 @@ public class Sensor implements Serializable {
     @OneToMany(mappedBy = "sensor")
     private List<SensorHistory> histories;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "sensor")
-    private List<Scenario> scenarios;
+    // @JsonIgnore
+    // @OneToMany(mappedBy = "sensor")
+    // private List<Scenario> scenarios;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -100,13 +100,13 @@ public class Sensor implements Serializable {
         this.histories = histories;
     }
 
-    public List<Scenario> getScenarios() {
-        return scenarios;
-    }
+    // public List<Scenario> getScenarios() {
+    // return scenarios;
+    // }
 
-    public void setScenarios(List<Scenario> scenarios) {
-        this.scenarios = scenarios;
-    }
+    // public void setScenarios(List<Scenario> scenarios) {
+    // this.scenarios = scenarios;
+    // }
 
     public User getUser() {
         return user;
