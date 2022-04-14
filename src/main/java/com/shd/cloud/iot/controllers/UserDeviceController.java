@@ -1,8 +1,12 @@
 package com.shd.cloud.iot.controllers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
+import javax.ws.rs.QueryParam;
+
 import com.shd.cloud.iot.exception.handleValidationExceptions;
 import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.OperatorHistory;
@@ -22,6 +26,7 @@ import com.shd.cloud.iot.sevices.SensorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/device")
 public class UserDeviceController extends handleValidationExceptions {
@@ -44,8 +50,7 @@ public class UserDeviceController extends handleValidationExceptions {
     public ResponseEntity<?> getUserDevices() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        List<Operator> operators = operatorService.getAllByUser(Long.valueOf(userDetails.getId()));
-        System.out.println(operators);
+        List<Operator> operators = operatorService.getAllByUser(Long.valueOf(userDetails.getId()), null);
         List<Sensor> sensors = sensorService.getAllByUser(userDetails.getId());
 
         return ResponseEntity.ok(new UserDeviceResponse(operators, sensors));
@@ -56,16 +61,24 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Operator operator = operatorService.create(body, userDetails.getId());
-        return ResponseEntity.ok(operator);
+        Map<String, Object> res = new HashMap<String, Object>();
+        res.put("data", operator);
+        res.put("mesage", "successfully created.");
+        res.put("status", 200);
+        return ResponseEntity.ok(res);
 
     }
 
     @GetMapping("/operator")
-    public ResponseEntity<?> getAllOperator() {
+    public ResponseEntity<?> getAllOperator(@QueryParam("key") String key) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        List<Operator> operators = operatorService.getAllByUser(userDetails.getId());
-        return ResponseEntity.ok(operators);
+        List<Operator> operators = operatorService.getAllByUser(userDetails.getId(), key);
+        Map<String, Object> res = new HashMap<String, Object>();
+        res.put("data", operators);
+        res.put("count", operators.size());
+        res.put("status", 200);
+        return ResponseEntity.ok(res);
 
     }
 

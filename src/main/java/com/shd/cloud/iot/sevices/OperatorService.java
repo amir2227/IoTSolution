@@ -2,19 +2,22 @@ package com.shd.cloud.iot.sevices;
 
 import java.util.Date;
 import java.util.List;
-
+import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
 import com.shd.cloud.iot.models.Location;
 import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.OperatorHistory;
 import com.shd.cloud.iot.models.User;
+import com.shd.cloud.iot.mqtt.model.MqttPublishModel;
+import com.shd.cloud.iot.mqtt.service.MqttService;
 import com.shd.cloud.iot.payload.request.EditOperator;
 import com.shd.cloud.iot.payload.request.OperatorRequest;
 import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.repositorys.OperatorHistoryRepository;
 import com.shd.cloud.iot.repositorys.OperatorRepository;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +36,16 @@ public class OperatorService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private MqttService mqttService;
+
     public Operator create(OperatorRequest dto, Long user_id) {
         User user = userService.get(user_id);
         System.out.println(user);
         if (operatorRepository.existsByNameAndUser_id(dto.getName(), user.getId())) {
             throw new DuplicatException(dto.getName() + " with user id " + user.getId());
         }
-        Operator operator = new Operator(dto.getName(), dto.getState(), dto.getType());
+        Operator operator = new Operator(dto.getName(), false, dto.getType());
         if (dto.getLocation_id() != null) {
             Location loc = locationService.get(dto.getLocation_id());
             operator.setLocation(loc);
@@ -56,10 +62,19 @@ public class OperatorService {
     public Operator Edit(EditOperator dto, Long id, Long user_id) {
         Operator operator = this.getOneByUser(id, user_id);
         if (dto.getState() != null) {
+            String topic = "operator/" + user_id + "/" + id;
+            MqttPublishModel mqttPublishModel = new MqttPublishModel(topic, String.valueOf(dto.getState()), true, 1);
+            try {
+                mqttService.publishMessage(mqttPublishModel);
+            } catch (MqttException e) {
+                System.out.println("mqtt exception: " + e.getMessage());
+                e.printStackTrace();
+            }
             operator.setState(dto.getState());
             Date date = new Date();
             OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator);
             operatorHRepo.save(oh);
+
         }
         if (dto.getName() != null) {
             operator.setName(dto.getName());
@@ -82,10 +97,13 @@ public class OperatorService {
                 .orElseThrow(() -> new NotFoundException("Operator Not Found with id " + id));
     }
 
-    public List<Operator> getAllByUser(Long user_id) {
+    public List<Operator> getAllByUser(Long user_id, String key) {
         // userService.get(user_id);
-        List<Operator> l = operatorRepository.findByUser_id(user_id);
-        return l;
+        if (key != null) {
+            return operatorRepository.search(key, user_id);
+        } else {
+            return operatorRepository.findByUser_id(user_id);
+        }
     }
 
     public Operator getOneByUser(Long id, Long user_id) {
@@ -119,6 +137,13 @@ public class OperatorService {
 
     public String delete(Long id, Long user_id) {
         Operator operator = this.getOneByUser(id, user_id);
+        // if (operator.getHistories().size() > 0) {
+        // throw new BadRequestException("this operator have some history. cannot be
+        // deleted!");
+        // }
+        if (operator.getScenario_Operators().size() > 0 || operator.getScenario_Sensors().size() > 0) {
+            throw new BadRequestException("this operator have some scenario. cannot be deleted!");
+        }
         try {
             operatorRepository.delete(operator);
             return "operator with id " + id + " successfully deleted";

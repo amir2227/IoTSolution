@@ -12,12 +12,9 @@ import com.shd.cloud.iot.exception.handleValidationExceptions;
 import com.shd.cloud.iot.mqtt.config.Mqtt;
 import com.shd.cloud.iot.mqtt.model.MqttPublishModel;
 import com.shd.cloud.iot.mqtt.model.MqttSubscribeModel;
-import com.shd.cloud.iot.sevices.OperatorService;
-import com.shd.cloud.iot.sevices.SensorService;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;

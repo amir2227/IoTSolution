@@ -1,12 +1,12 @@
 package com.shd.cloud.iot.payload.request.scenarioRequest;
 
-public class ScenarioOperators {
+public class ScenarioOperatorRequest {
 
     private Long operator_id;
 
     private Boolean operator_state;
 
-    public ScenarioOperators() {
+    public ScenarioOperatorRequest() {
     }
 
     public Long getOperator_id() {

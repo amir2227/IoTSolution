@@ -1,10 +1,13 @@
 package com.shd.cloud.iot.controllers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import com.shd.cloud.iot.exception.handleValidationExceptions;
+import com.shd.cloud.iot.models.User;
 import com.shd.cloud.iot.payload.request.LoginRequest;
 import com.shd.cloud.iot.payload.request.SignupRequest;
 import com.shd.cloud.iot.payload.response.JwtResponse;
@@ -55,7 +58,12 @@ public class AuthController extends handleValidationExceptions {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        return ResponseEntity.ok(userService.create(signUpRequest));
+        User user = userService.create(signUpRequest);
+        Map<String, Object> res = new HashMap<>();
+        res.put("data", user);
+        res.put("mesage", "successfully created.");
+        res.put("status", 200);
+        return ResponseEntity.ok(res);
     }
 
 }

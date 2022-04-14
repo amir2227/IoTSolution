@@ -26,6 +26,10 @@ public class Location {
     @Column(length = 20)
     private String type;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @OneToMany(mappedBy = "location")
     private List<Operator> operators;
 
@@ -42,9 +46,10 @@ public class Location {
     public Location() {
     }
 
-    public Location(String name, String type) {
+    public Location(String name, String type, User user) {
         this.name = name;
         this.type = type;
+        this.user = user;
     }
 
     public Long getId() {
@@ -61,6 +66,14 @@ public class Location {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getType() {

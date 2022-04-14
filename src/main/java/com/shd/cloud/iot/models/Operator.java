@@ -2,6 +2,7 @@ package com.shd.cloud.iot.models;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -39,12 +40,16 @@ public class Operator {
     @Column(length = 20)
     private String type;
 
-    @OneToMany(mappedBy = "operator")
+    @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
     private List<OperatorHistory> histories;
 
-    // @JsonIgnore
-    // @OneToMany(mappedBy = "operator")
-    // private List<Scenario> scenarios;
+    @JsonIgnore
+    @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
+    private List<ScenarioSensors> scenario_Sensors;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
+    private List<ScenarioOperators> scenario_Operators;
 
     @ManyToOne
     @JoinColumn(name = "location_id")
@@ -111,13 +116,21 @@ public class Operator {
         this.histories = histories;
     }
 
-    // public List<Scenario> getScenarios() {
-    // return scenarios;
-    // }
+    public List<ScenarioSensors> getScenario_Sensors() {
+        return scenario_Sensors;
+    }
 
-    // public void setSenarios(List<Scenario> scenarios) {
-    // this.scenarios = scenarios;
-    // }
+    public void setScenario_Sensors(List<ScenarioSensors> scenario_Sensors) {
+        this.scenario_Sensors = scenario_Sensors;
+    }
+
+    public List<ScenarioOperators> getScenario_Operators() {
+        return scenario_Operators;
+    }
+
+    public void setScenario_Operators(List<ScenarioOperators> scenario_Operators) {
+        this.scenario_Operators = scenario_Operators;
+    }
 
     public User getUser() {
         return user;
