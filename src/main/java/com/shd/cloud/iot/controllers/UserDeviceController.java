@@ -8,12 +8,15 @@ import javax.validation.Valid;
 import javax.ws.rs.QueryParam;
 
 import com.shd.cloud.iot.exception.handleValidationExceptions;
+import com.shd.cloud.iot.models.Location;
 import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.OperatorHistory;
 import com.shd.cloud.iot.models.Sensor;
 import com.shd.cloud.iot.models.SensorHistory;
+import com.shd.cloud.iot.payload.request.EditLocationRequest;
 import com.shd.cloud.iot.payload.request.EditOperator;
 import com.shd.cloud.iot.payload.request.EditSensorRequest;
+import com.shd.cloud.iot.payload.request.LocationRequest;
 import com.shd.cloud.iot.payload.request.OperatorRequest;
 import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.payload.request.SensorRequest;
@@ -21,6 +24,7 @@ import com.shd.cloud.iot.payload.response.MessageResponse;
 import com.shd.cloud.iot.payload.response.SearchResponse;
 import com.shd.cloud.iot.payload.response.UserDeviceResponse;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
+import com.shd.cloud.iot.sevices.LocationService;
 import com.shd.cloud.iot.sevices.OperatorService;
 import com.shd.cloud.iot.sevices.SensorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +49,8 @@ public class UserDeviceController extends handleValidationExceptions {
     private OperatorService operatorService;
     @Autowired
     private SensorService sensorService;
+    @Autowired
+    private LocationService locationService;
 
     @GetMapping("")
     public ResponseEntity<?> getUserDevices() {
@@ -161,4 +167,54 @@ public class UserDeviceController extends handleValidationExceptions {
         return ResponseEntity.ok(new SearchResponse(sh, sh.size()));
     }
 
+    @PostMapping("/location")
+    public ResponseEntity<?> createLocation(@Valid @RequestBody LocationRequest body) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        Location location = locationService.create(body, userDetails.getId());
+        Map<String, Object> res = new HashMap<String, Object>();
+        res.put("data", location);
+        res.put("mesage", "successfully created.");
+        res.put("status", 200);
+        return ResponseEntity.ok(res);
+
+    }
+
+    @GetMapping("/location")
+    public ResponseEntity<?> getAllLocation(@QueryParam("key") String key) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        List<Location> locations = locationService.search(userDetails.getId(), key);
+        Map<String, Object> res = new HashMap<String, Object>();
+        res.put("data", locations);
+        res.put("count", locations.size());
+        res.put("status", 200);
+        return ResponseEntity.ok(res);
+
+    }
+
+    @GetMapping("/location/{id}")
+    public ResponseEntity<?> getOneLocation(@PathVariable("id") Long id) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+
+        return ResponseEntity.ok(locationService.getByUser(id, userDetails.getId()));
+    }
+
+    @PatchMapping("/location/{id}")
+    public ResponseEntity<?> EditLocation(@PathVariable("id") Long id, @Valid @RequestBody EditLocationRequest body) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        Location location = locationService.edit(id, userDetails.getId(), body);
+        return ResponseEntity.ok(location);
+
+    }
+
+    @DeleteMapping("/location/{id}")
+    public ResponseEntity<?> deleteLocation(@PathVariable("id") Long id) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        String result = locationService.delete(id, userDetails.getId());
+        return ResponseEntity.ok(new MessageResponse(result));
+    }
 }

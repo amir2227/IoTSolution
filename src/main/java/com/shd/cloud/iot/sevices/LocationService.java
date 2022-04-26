@@ -35,12 +35,21 @@ public class LocationService {
                 .orElseThrow(() -> new NotFoundException("Location Not Found with id: " + id));
     }
 
-    public List<Location> search(Long user_id) {
-        return locationRepository.findByUser_id(user_id);
+    public Location getByUser(Long id, Long user_id) {
+        return locationRepository.findByIdAndUser_id(id, user_id)
+                .orElseThrow(() -> new NotFoundException("Location Not Found with id: " + id));
     }
 
-    public Location edit(Long id, EditLocationRequest request) {
-        Location location = this.get(id);
+    public List<Location> search(Long user_id, String key) {
+        if (key != null) {
+            return locationRepository.search(key, user_id);
+        } else {
+            return locationRepository.findByUser_id(user_id);
+        }
+    }
+
+    public Location edit(Long id, Long user_id, EditLocationRequest request) {
+        Location location = this.getByUser(id, user_id);
         if (request.getName() != null) {
             location.setName(request.getName());
         }
@@ -50,8 +59,8 @@ public class LocationService {
         return locationRepository.save(location);
     }
 
-    public String delete(Long id) {
-        Location location = this.get(id);
+    public String delete(Long id, Long user_id) {
+        Location location = this.getByUser(id, user_id);
         try {
             locationRepository.delete(location);
             return "location with id " + id + " successfully deleted";

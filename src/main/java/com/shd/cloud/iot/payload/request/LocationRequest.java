@@ -1,6 +1,5 @@
 package com.shd.cloud.iot.payload.request;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -11,7 +10,7 @@ public class LocationRequest {
     private String name;
 
     @NotBlank
-    @Max(20)
+    @Size(min = 3, max = 20)
     private String type;
 
     private Long parent_id;
