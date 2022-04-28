@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.validation.Valid;
 import javax.ws.rs.QueryParam;
-
 import com.shd.cloud.iot.exception.handleValidationExceptions;
 import com.shd.cloud.iot.models.Location;
 import com.shd.cloud.iot.models.Operator;
