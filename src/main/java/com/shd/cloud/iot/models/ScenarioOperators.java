@@ -8,6 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 // target operators
 @Entity(name = "scenario_operators")
 public class ScenarioOperators {
@@ -30,9 +32,8 @@ public class ScenarioOperators {
     public ScenarioOperators() {
     }
 
-    public ScenarioOperators(Operator operator, Scenario scenario, Boolean operator_state) {
+    public ScenarioOperators(Operator operator,  Boolean operator_state) {
         this.operator = operator;
-        this.scenario = scenario;
         this.operator_state = operator_state;
     }
 

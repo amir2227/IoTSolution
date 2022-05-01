@@ -25,6 +25,7 @@ public class SensorService {
 
     @Autowired
     private SensorRepository sensorRepository;
+    
 
     @Autowired
     private LocationService locationService;
@@ -40,7 +41,7 @@ public class SensorService {
         if (sensorRepository.existsByNameAndUser_id(dto.getName(), user.getId())) {
             throw new DuplicatException(dto.getName() + " with user id " + user.getId());
         }
-        Sensor sensor = new Sensor(dto.getName(), dto.getName());
+        Sensor sensor = new Sensor(dto.getName(), dto.getType());
         if (dto.getLocation_id() != null) {
             Location loc = locationService.get(dto.getLocation_id());
             sensor.setLocation(loc);

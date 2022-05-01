@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 //effective sensors
 @Entity(name = "senario_sensors")
 public class ScenarioSensors {
@@ -38,14 +40,6 @@ public class ScenarioSensors {
     private Scenario scenario;
 
     public ScenarioSensors() {
-    }
-
-    public ScenarioSensors(EModality modality, String points, Sensor sensor, Operator operator, Scenario scenario) {
-        this.modality = modality;
-        this.points = points;
-        this.sensor = sensor;
-        this.operator = operator;
-        this.scenario = scenario;
     }
 
     public Long getId() {
