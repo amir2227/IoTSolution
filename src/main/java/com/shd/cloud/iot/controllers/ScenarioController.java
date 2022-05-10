@@ -9,7 +9,6 @@ import com.shd.cloud.iot.models.Scenario;
 import com.shd.cloud.iot.payload.request.scenarioRequest.ScenarioRequest;
 // import com.shd.cloud.iot.payload.request.ScenarioRequest;
 import com.shd.cloud.iot.payload.response.ScenarioResponse;
-import com.shd.cloud.iot.repositorys.ScenarioRepository;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.ScenarioService;
 
