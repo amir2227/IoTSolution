@@ -1,7 +1,6 @@
 package com.shd.cloud.iot.sevices;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.shd.cloud.iot.exception.BadRequestException;

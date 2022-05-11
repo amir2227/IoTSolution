@@ -39,6 +39,11 @@ public class OperatorService {
     @Autowired
     private MqttService mqttService;
 
+    /**
+     * @param dto
+     * @param user_id
+     * @return Operator
+     */
     public Operator create(OperatorRequest dto, Long user_id) {
         User user = userService.get(user_id);
         System.out.println(user);
@@ -59,10 +64,16 @@ public class OperatorService {
 
     }
 
+    /**
+     * @param dto
+     * @param id
+     * @param user_id
+     * @return Operator
+     */
     public Operator Edit(EditOperator dto, Long id, Long user_id) {
         Operator operator = this.getOneByUser(id, user_id);
         if (dto.getState() != null) {
-            String topic = "operator/" + user_id + "/" + id;
+            String topic = "operator/" + operator.getUser().getToken();
             MqttPublishModel mqttPublishModel = new MqttPublishModel(topic, String.valueOf(dto.getState()), true, 1);
             try {
                 mqttService.publishMessage(mqttPublishModel);
@@ -76,6 +87,7 @@ public class OperatorService {
             operatorHRepo.save(oh);
 
         }
+
         if (dto.getName() != null) {
             operator.setName(dto.getName());
         }
@@ -83,20 +95,57 @@ public class OperatorService {
             operator.setType(dto.getType());
         }
         if (dto.getLocation_id() != null) {
-            if (dto.getLocation_id().equals(operator.getLocation().getId())) {
-                Location location = locationService.get(dto.getLocation_id());
-                operator.setLocation(location);
-            }
+            // if (dto.getLocation_id().equals(operator.getLocation().getId())) {
+            Location location = locationService.get(dto.getLocation_id());
+            operator.setLocation(location);
+            // }
         }
 
         return operatorRepository.save(operator);
     }
 
+    /**
+     * @param oid operator id
+     * @param uid shared user id
+     * @return boolean
+     */
+    public boolean changeStatebySharedUser(Long oid, Long uid, boolean state) {
+        User user = userService.get(uid);
+        Operator operator = this.get(oid);
+        boolean res = false;
+
+        if (!operator.getShared().getTarget_users().contains(user))
+            throw new BadRequestException("access denied");
+
+        String topic = "operator/" + operator.getUser().getToken();
+        MqttPublishModel mqttPublishModel = new MqttPublishModel(topic, String.valueOf(state), true, 1);
+        try {
+            mqttService.publishMessage(mqttPublishModel);
+            operator.setState(state);
+            operatorRepository.save(operator);
+            res = true;
+        } catch (Exception e) {
+            res = false;
+            throw new BadRequestException(e.getMessage());
+
+        }
+        return res;
+    }
+
+    /**
+     * @param id
+     * @return Operator
+     */
     public Operator get(Long id) {
         return operatorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Operator Not Found with id " + id));
     }
 
+    /**
+     * @param user_id
+     * @param key
+     * @return List<Operator>
+     */
     public List<Operator> getAllByUser(Long user_id, String key) {
         // userService.get(user_id);
         if (key != null) {
@@ -106,12 +155,22 @@ public class OperatorService {
         }
     }
 
+    /**
+     * @param id
+     * @param user_id
+     * @return Operator
+     */
     public Operator getOneByUser(Long id, Long user_id) {
         // userService.get(user_id);
         return operatorRepository.findByIdAndUser_id(id, user_id)
                 .orElseThrow(() -> new NotFoundException("Operator Not Found or Not this user operator"));
     }
 
+    /**
+     * @param id
+     * @param token
+     * @return Operator
+     */
     public Operator getByToken(Long id, String token) {
         Operator op = this.get(id);
         if (!op.getUser().getToken().equals(token)) {
@@ -120,6 +179,11 @@ public class OperatorService {
         return op;
     }
 
+    /**
+     * @param id
+     * @param searchRequest
+     * @return List<OperatorHistory>
+     */
     public List<OperatorHistory> searchHistories(Long id, SearchRequest searchRequest) {
         this.get(id);
         if (searchRequest.getStartDate() != null) {
@@ -135,6 +199,11 @@ public class OperatorService {
 
     }
 
+    /**
+     * @param id
+     * @param user_id
+     * @return String
+     */
     public String delete(Long id, Long user_id) {
         Operator operator = this.getOneByUser(id, user_id);
         // if (operator.getHistories().size() > 0) {

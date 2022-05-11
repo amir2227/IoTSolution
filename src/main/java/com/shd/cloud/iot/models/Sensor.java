@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "sensors", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "user_id", "name" })
 })
-@JsonIgnoreProperties(value = { "histories", "user" })
+@JsonIgnoreProperties(value = { "histories", "user", "shared" })
 public class Sensor implements Serializable {
 
     @Id
@@ -51,6 +51,10 @@ public class Sensor implements Serializable {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "shared_users")
+    private SharedDevice shared;
 
     public Sensor() {
     }
@@ -114,6 +118,14 @@ public class Sensor implements Serializable {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public SharedDevice getShared() {
+        return shared;
+    }
+
+    public void setShared(SharedDevice shared) {
+        this.shared = shared;
     }
 
 }

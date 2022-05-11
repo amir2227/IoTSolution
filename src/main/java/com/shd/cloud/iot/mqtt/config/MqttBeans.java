@@ -63,6 +63,9 @@ public class MqttBeans {
                     System.out.println("This is the topic");
                 }
                 System.out.println("message: " + message.getPayload());
+                System.out.println("message header: " + message.getHeaders());
+                System.out.println("message topic: " + topic);
+
             }
 
         };

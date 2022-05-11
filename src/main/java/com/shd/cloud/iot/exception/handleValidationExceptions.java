@@ -16,7 +16,7 @@ public class handleValidationExceptions {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(
+    public Map<String, String> handleNotValidExceptions(
             MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
@@ -29,7 +29,7 @@ public class handleValidationExceptions {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public Map<String, String> handleValidationExceptions(
+    public Map<String, String> handleNotReadableException(
             HttpMessageNotReadableException ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", ex.getMessage());
@@ -38,7 +38,7 @@ public class handleValidationExceptions {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BindException.class)
-    public Map<String, String> handleValidationExceptions(BindException ex) {
+    public Map<String, String> handleBindExceptions(BindException ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", ex.getFieldError().getDefaultMessage());
         return errors;
@@ -46,7 +46,7 @@ public class handleValidationExceptions {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public Map<String, Object> handleValidationExceptions(MissingServletRequestParameterException ex) {
+    public Map<String, Object> handleMissingParameterExceptions(MissingServletRequestParameterException ex) {
         Map<String, Object> errors = new HashMap<>();
         errors.put("status", HttpStatus.BAD_REQUEST.value());
         errors.put("message", ex.getMessage());
@@ -55,7 +55,7 @@ public class handleValidationExceptions {
 
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public Map<String, String> handleValidationExceptions(HttpRequestMethodNotSupportedException ex) {
+    public Map<String, String> handleMethodNotSupportExceptions(HttpRequestMethodNotSupportedException ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", ex.getMessage());
         errors.put("method", ex.getMethod());
