@@ -25,7 +25,6 @@ public class SensorService {
 
     @Autowired
     private SensorRepository sensorRepository;
-    
 
     @Autowired
     private LocationService locationService;
@@ -76,11 +75,13 @@ public class SensorService {
             sensor.setType(dto.getType());
         }
         if (dto.getLocation_id() != null) {
-            if (!dto.getLocation_id().equals(sensor.getLocation().getId())) {
-                Location location = locationService.get(dto.getLocation_id());
-                sensor.setLocation(location);
-            }
+            // if (!dto.getLocation_id().equals(sensor.getLocation().getId())) {
+            Location location = locationService.get(dto.getLocation_id());
+            sensor.setLocation(location);
+            // }
         }
+        sensorHistoryRepository.save(new SensorHistory("10", new Date().getTime(), sensor));
+        sensorHistoryRepository.save(new SensorHistory("11", new Date().getTime(), sensor));
         return sensorRepository.save(sensor);
 
     }
@@ -91,23 +92,27 @@ public class SensorService {
             sensorRepository.delete(sensor);
             return "sensor with id " + id + " successfully deleted";
         } catch (Exception e) {
-            return e.getMessage();
+            throw new BadRequestException("sensor with id " + id + " can not be deleted! ");
         }
 
     }
 
     public List<SensorHistory> searchHistory(Long id, SearchRequest sRequest) {
-        if (sRequest.getStartDate() != null) {
-            if (sRequest.getEndDate() != null) {
-                return sensorHistoryRepository.findAllWithBetweenDate(sRequest.getStartDate(), sRequest.getEndDate());
-            }
-            return sensorHistoryRepository.findAllWithStartDate(sRequest.getStartDate());
-        } else if (sRequest.getEndDate() != null) {
-            return sensorHistoryRepository.findAllWithEndDate(sRequest.getEndDate());
-        } else {
+        if (sRequest == null)
             return sensorHistoryRepository.findBySensor_id(id);
+        else {
+            if (sRequest.getStartDate() != null) {
+                if (sRequest.getEndDate() != null) {
+                    return sensorHistoryRepository.findAllWithBetweenDate(sRequest.getStartDate(),
+                            sRequest.getEndDate());
+                }
+                return sensorHistoryRepository.findAllWithStartDate(sRequest.getStartDate());
+            } else if (sRequest.getEndDate() != null) {
+                return sensorHistoryRepository.findAllWithEndDate(sRequest.getEndDate());
+            } else {
+                return sensorHistoryRepository.findBySensor_id(id);
+            }
         }
-
     }
 
     public SensorHistory saveSensorHistory(Long sid, SensorHistoryRequest shr) {

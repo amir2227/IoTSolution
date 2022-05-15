@@ -1,6 +1,14 @@
 package com.shd.cloud.iot.mqtt.config;
 
+import java.util.List;
+
+import com.shd.cloud.iot.models.SensorHistory;
+import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
+import com.shd.cloud.iot.sevices.SensorService;
+
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.hibernate.query.criteria.internal.expression.function.CurrentTimeFunction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -18,6 +26,9 @@ import org.springframework.messaging.MessagingException;
 
 @Configuration
 public class MqttBeans {
+    @Autowired
+    private SensorService sensorService;
+
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
@@ -59,12 +70,31 @@ public class MqttBeans {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC).toString();
-                if (topic.equals("sensor/hum")) {
-                    System.out.println("This is the topic");
+                String payload = message.getPayload().toString();
+                if (topic.startsWith("sensor/")) {
+                    try {
+                        String t[] = topic.split("/");
+                        System.out.println("This is the topic");
+                        List<SensorHistory> sh = sensorService.searchHistory(Long.valueOf(t[1]), null);
+                        if(sh.size() > 0){
+                        String data = sh.get(sh.size() -1).getData();
+                        System.out.println("data   -->"+data);
+                        if(!data.equals(payload)){
+                            System.out.println("in if");
+                        SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
+                        sensorService.saveSensorHistory(Long.valueOf(t[1]), sr); 
+                        }
+                    }else{
+                        SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
+                        sensorService.saveSensorHistory(Long.valueOf(t[1]), sr); 
+                    }
+                    } catch (Exception e) {
+                        e.getMessage();
+                    }
                 }
-                System.out.println("message: " + message.getPayload());
-                System.out.println("message header: " + message.getHeaders());
-                System.out.println("message topic: " + topic);
+                // System.out.println("message: " + message.getPayload());
+                // System.out.println("message header: " + message.getHeaders());
+                // System.out.println("message topic: " + topic);
 
             }
 

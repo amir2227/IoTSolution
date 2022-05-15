@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SharedDeviceRepository extends JpaRepository<Long, SharedDevice> {
+public interface SharedDeviceRepository extends JpaRepository<SharedDevice, Long> {
     
 }
