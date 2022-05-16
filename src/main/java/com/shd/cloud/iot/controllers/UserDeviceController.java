@@ -56,7 +56,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         List<Operator> operators = operatorService.getAllByUser(Long.valueOf(userDetails.getId()), null);
-        List<Sensor> sensors = sensorService.getAllByUser(userDetails.getId());
+        List<Sensor> sensors = sensorService.getAllByUser(Long.valueOf(userDetails.getId()), null);
 
         return ResponseEntity.ok(new UserDeviceResponse(operators, sensors));
     }
@@ -127,10 +127,10 @@ public class UserDeviceController extends handleValidationExceptions {
     }
 
     @GetMapping("/sensor")
-    public ResponseEntity<?> getAllSensors() {
+    public ResponseEntity<?> getAllSensors(@QueryParam("key") String key) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        List<Sensor> sensors = sensorService.getAllByUser(userDetails.getId());
+        List<Sensor> sensors = sensorService.getAllByUser(userDetails.getId(), key);
         return ResponseEntity.ok(sensors);
 
     }

@@ -61,9 +61,11 @@ public class SensorService {
                 .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
-    public List<Sensor> getAllByUser(Long user_id) {
-        userService.get(user_id);
-        return sensorRepository.findByUser_id(user_id);
+    public List<Sensor> getAllByUser(Long user_id, String key) {
+        if (key != null) {
+            return sensorRepository.search(key, user_id);
+        } else
+            return sensorRepository.findByUser_id(user_id);
     }
 
     public Sensor Edit(EditSensorRequest dto, Long id, Long user_id) {

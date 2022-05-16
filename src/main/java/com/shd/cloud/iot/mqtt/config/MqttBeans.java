@@ -5,9 +5,7 @@ import java.util.List;
 import com.shd.cloud.iot.models.SensorHistory;
 import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
 import com.shd.cloud.iot.sevices.SensorService;
-
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.hibernate.query.criteria.internal.expression.function.CurrentTimeFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -76,18 +74,18 @@ public class MqttBeans {
                         String t[] = topic.split("/");
                         System.out.println("This is the topic");
                         List<SensorHistory> sh = sensorService.searchHistory(Long.valueOf(t[1]), null);
-                        if(sh.size() > 0){
-                        String data = sh.get(sh.size() -1).getData();
-                        System.out.println("data   -->"+data);
-                        if(!data.equals(payload)){
-                            System.out.println("in if");
-                        SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
-                        sensorService.saveSensorHistory(Long.valueOf(t[1]), sr); 
+                        if (sh.size() > 0) {
+                            String data = sh.get(sh.size() - 1).getData();
+                            System.out.println("data   -->" + data);
+                            if (!data.equals(payload)) {
+                                System.out.println("in if");
+                                SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
+                                sensorService.saveSensorHistory(Long.valueOf(t[1]), sr);
+                            }
+                        } else {
+                            SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
+                            sensorService.saveSensorHistory(Long.valueOf(t[1]), sr);
                         }
-                    }else{
-                        SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
-                        sensorService.saveSensorHistory(Long.valueOf(t[1]), sr); 
-                    }
                     } catch (Exception e) {
                         e.getMessage();
                     }
