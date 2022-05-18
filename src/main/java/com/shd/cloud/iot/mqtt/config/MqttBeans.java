@@ -7,6 +7,7 @@ import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
 import com.shd.cloud.iot.sevices.SensorService;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -15,6 +16,7 @@ import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
+import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.Message;
@@ -27,12 +29,18 @@ public class MqttBeans {
     @Autowired
     private SensorService sensorService;
 
+    @Value("${message.broker.host}")
+    private String host;
+    @Value("${message.broker.port}")
+    private String port;
+
+    private static final String MQTT_PUBLISHER_ID = "spring-server";
+
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
-
-        options.setServerURIs(new String[] { "tcp://127.0.0.1:1884" });
+        options.setServerURIs(new String[] { "tcp://" + host + ":" + port });
         // options.setUserName("admin");
         // String pass = "12345678";
         // options.setPassword(pass.toCharArray());
@@ -46,6 +54,26 @@ public class MqttBeans {
     @Bean
     public MessageChannel mqttInputChannel() {
         return new DirectChannel();
+    }
+
+    /**
+     * MQTT Information channels （ producer ）
+     **/
+    @Bean
+    public MessageChannel mqttOutboundChannel() {
+        return new DirectChannel();
+    }
+
+    /**
+     * MQTT Message handler （ producer ）
+     **/
+    @Bean
+    @ServiceActivator(inputChannel = "mqttOutboundChannel")
+    public MessageHandler mqttOutbound() {
+        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(MQTT_PUBLISHER_ID, mqttClientFactory());
+        messageHandler.setAsync(true);
+        messageHandler.setDefaultTopic("defaultTopic");
+        return messageHandler;
     }
 
     @Bean
@@ -90,9 +118,9 @@ public class MqttBeans {
                         e.getMessage();
                     }
                 }
-                // System.out.println("message: " + message.getPayload());
-                // System.out.println("message header: " + message.getHeaders());
-                // System.out.println("message topic: " + topic);
+                 System.out.println("message: " + message.getPayload());
+                 System.out.println("message header: " + message.getHeaders());
+                 System.out.println("message topic: " + topic);
 
             }
 

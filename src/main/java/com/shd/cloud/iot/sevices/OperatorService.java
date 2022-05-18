@@ -2,6 +2,9 @@ package com.shd.cloud.iot.sevices;
 
 import java.util.Date;
 import java.util.List;
+
+import javax.annotation.Resource;
+
 import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
@@ -9,15 +12,13 @@ import com.shd.cloud.iot.models.Location;
 import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.OperatorHistory;
 import com.shd.cloud.iot.models.User;
-import com.shd.cloud.iot.mqtt.model.MqttPublishModel;
-import com.shd.cloud.iot.mqtt.service.MqttService;
+import com.shd.cloud.iot.mqtt.config.MqttGateway;
 import com.shd.cloud.iot.payload.request.EditOperator;
 import com.shd.cloud.iot.payload.request.OperatorRequest;
 import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.repositorys.OperatorHistoryRepository;
 import com.shd.cloud.iot.repositorys.OperatorRepository;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,8 +37,10 @@ public class OperatorService {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private MqttService mqttService;
+    @Resource
+    private MqttGateway mqttGateway;
+    // @Autowired
+    // private MqttService mqttService;
 
     /**
      * @param dto
@@ -74,10 +77,9 @@ public class OperatorService {
         Operator operator = this.getOneByUser(id, user_id);
         if (dto.getState() != null) {
             String topic = "operator/" + operator.getUser().getToken();
-            MqttPublishModel mqttPublishModel = new MqttPublishModel(topic, String.valueOf(dto.getState()), true, 1);
             try {
-                mqttService.publishMessage(mqttPublishModel);
-            } catch (MqttException e) {
+                mqttGateway.sendToMqtt(topic, 1, String.valueOf(dto.getState()));
+            } catch (Exception e) {
                 System.out.println("mqtt exception: " + e.getMessage());
                 e.printStackTrace();
             }
@@ -95,7 +97,6 @@ public class OperatorService {
             operator.setType(dto.getType());
         }
         if (dto.getLocation_id() != null) {
-            // if (dto.getLocation_id().equals(operator.getLocation().getId())) {
             Location location = locationService.get(dto.getLocation_id());
             operator.setLocation(location);
             // }
@@ -118,9 +119,8 @@ public class OperatorService {
             throw new BadRequestException("access denied");
 
         String topic = "operator/" + operator.getUser().getToken();
-        MqttPublishModel mqttPublishModel = new MqttPublishModel(topic, String.valueOf(state), true, 1);
         try {
-            mqttService.publishMessage(mqttPublishModel);
+            mqttGateway.sendToMqtt(topic, 1, String.valueOf(state));
             operator.setState(state);
             operatorRepository.save(operator);
             res = true;
