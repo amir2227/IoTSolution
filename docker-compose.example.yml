@@ -1,0 +1,62 @@
+version: '3.8'
+services:
+  hivemq:
+    image: hivemq/hivemq4
+    restart: unless-stopped
+    ports:
+      - 192.168.1.184:9090:8080
+      - 192.168.1.184:1884:1883
+    networks:
+      - spring-net
+  mysqldb:
+    image: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: adminadmin 
+      MYSQL_DATABASE: iot
+      MYSQL_USER: amir
+      MYSQL_PASSWORD: nE5kMc7JCGNqwDQM
+    ports:
+        - 192.168.1.184:3307:3306
+    volumes:
+        - db:/var/lib/mysql
+    networks:
+      - spring-net
+  app:
+    depends_on:
+      - mysqldb
+      - hivemq
+    build:
+      context: ./cloud.iot
+      dockerfile: ./Dockerfile
+    restart: unless-stopped
+    ports:
+      - 192.168.1.184:8181:8081
+    environment:
+      - spring.datasource.url=jdbc:mysql://mysqldb:3306/iot
+      - spring.datasource.username=root
+      - spring.datasource.password=adminadmin
+      - message.broker.host=hivemq
+      - message.broker.port=1883
+    volumes:
+      - .m2:/root/.m2
+    stdin_open: true
+    tty: true
+    networks:
+      - spring-net
+  front:
+    depends_on:
+      - app
+    build:
+      context: ./frontend/vue-jwt
+      dockerfile: ./Dockerfile
+    restart: on-failure
+    ports:
+      - 192.168.1.184:2021:2020
+    environment:
+      - BACK_URL=app
+volumes:
+  db:
+networks:
+  spring-net:
+    external: true

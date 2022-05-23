@@ -63,7 +63,7 @@ public class MqttBeans {
     public MessageChannel mqttOutboundChannel() {
         return new DirectChannel();
     }
-
+ 
     /**
      * MQTT Message handler （ producer ）
      **/
