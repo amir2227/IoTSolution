@@ -76,9 +76,12 @@ public class OperatorService {
     public Operator Edit(EditOperator dto, Long id, Long user_id) {
         Operator operator = this.getOneByUser(id, user_id);
         if (dto.getState() != null) {
-            String topic = "operator/" + operator.getUser().getToken();
+            String topic = "operator/" + operator.getId() + "/" + operator.getUser().getToken();
             try {
-                mqttGateway.sendToMqtt(topic, 1, String.valueOf(dto.getState()));
+                if (dto.getState())
+                    mqttGateway.sendToMqtt(topic, 1, "1");
+                else
+                    mqttGateway.sendToMqtt(topic, 1, "0");
             } catch (Exception e) {
                 System.out.println("mqtt exception: " + e.getMessage());
                 e.printStackTrace();
