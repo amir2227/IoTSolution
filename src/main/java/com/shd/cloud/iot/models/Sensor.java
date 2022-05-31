@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "sensors", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "user_id", "name" })
 })
-@JsonIgnoreProperties(value = { "histories", "user", "shared" })
+@JsonIgnoreProperties(value = { "histories", "user", "shared", "location" })
 public class Sensor implements Serializable {
 
     @Id
@@ -44,7 +44,6 @@ public class Sensor implements Serializable {
     @OneToMany(mappedBy = "sensor")
     private List<SensorHistory> histories;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "sensor")
     private List<ScenarioSensors> scenarios;
 

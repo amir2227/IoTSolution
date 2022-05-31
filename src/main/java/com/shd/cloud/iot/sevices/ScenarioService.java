@@ -38,6 +38,12 @@ public class ScenarioService {
     @Autowired
     private SensorService sensorService;
 
+    
+    /** 
+     * @param scenarioList 
+     * @param user_id
+     * @return List<Scenario>
+     */
     public List<Scenario> create(List<ScenarioRequest> scenarioList, Long user_id) {
 
         List<Scenario> scenarios = new ArrayList<>();
@@ -57,20 +63,22 @@ public class ScenarioService {
             List<ScenarioSensors> scenarioSensors = new ArrayList<>();
             List<ScenarioOperators> scenarioOperators = new ArrayList<>();
             for (ScenarioSensorRequest s_sensor : scenario.getScenarioSensors()) {
-                if (s_sensor.getSensor_id() != null && s_sensor.getOperator_id() != null){
+                if (s_sensor.getSensor_id() != null && s_sensor.getOperator_id() != null) {
                     throw new BadRequestException("You are not allowed to use both sensor and operator id");
                 }
-                System.out.println("sensor id: "+s_sensor.getSensor_id()+"\n operator id: " +s_sensor.getOperator_id() );
+                System.out.println(
+                        "sensor id: " + s_sensor.getSensor_id() + "\n operator id: " + s_sensor.getOperator_id());
                 ScenarioSensors scenarioSensor = new ScenarioSensors();
                 if (s_sensor.getOperator_id() != null) {
-                    System.out.println("sssssssssssssssssssssssssssssssssss");
                     Operator operatorModel = operatorService.get(s_sensor.getOperator_id());
-                    System.out.println(!(s_sensor.getModality().equals(EModality.OFF) || s_sensor.getModality().equals(EModality.ON)));
-                    if (!(s_sensor.getModality().equals(EModality.OFF) || s_sensor.getModality().equals(EModality.ON))) {
+                    System.out.println(!(s_sensor.getModality().equals(EModality.OFF)
+                            || s_sensor.getModality().equals(EModality.ON)));
+                    if (!(s_sensor.getModality().equals(EModality.OFF)
+                            || s_sensor.getModality().equals(EModality.ON))) {
                         throw new BadRequestException("In this scenario modality must include [ON or OFF]");
                     }
                     scenarioSensor.setOperator(operatorModel);
-                    
+
                 } else if (s_sensor.getSensor_id() != null) {
                     Sensor sensorModel = sensorService.get(s_sensor.getSensor_id());
                     if (s_sensor.getModality().equals(EModality.OFF) || s_sensor.getModality().equals(EModality.ON))
@@ -97,7 +105,8 @@ public class ScenarioService {
             sc.setEffective_sensors(scenarioSensors);
             for (ScenarioOperatorRequest s_operator : scenario.getScenarioOperators()) {
                 Operator operatorModel = operatorService.get(s_operator.getOperator_id());
-                ScenarioOperators scenarioOperator = new ScenarioOperators(operatorModel, s_operator.getOperator_state());
+                ScenarioOperators scenarioOperator = new ScenarioOperators(operatorModel,
+                        s_operator.getOperator_state());
                 scenarioOperator.setScenario(sc);
                 scenarioOperators.add(scenarioOperatorsRepo.save(scenarioOperator));
             }

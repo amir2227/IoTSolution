@@ -10,7 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "scenario")
@@ -23,11 +22,9 @@ public class Scenario {
     @Column(length = 30)
     private String name;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "scenario")
     private List<ScenarioOperators> target_operators;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "scenario")
     private List<ScenarioSensors> effective_sensors;
 

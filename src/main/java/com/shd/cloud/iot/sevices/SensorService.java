@@ -35,6 +35,12 @@ public class SensorService {
     @Autowired
     private SensorHistoryRepository sensorHistoryRepository;
 
+    
+    /** 
+     * @param dto
+     * @param user_id
+     * @return Sensor
+     */
     public Sensor create(SensorRequest dto, Long user_id) {
         User user = userService.get(user_id);
         if (sensorRepository.existsByNameAndUser_id(dto.getName(), user.getId())) {
@@ -50,17 +56,34 @@ public class SensorService {
         return sensorRepository.save(sensor);
     }
 
+    
+    /** 
+     * @param id
+     * @return Sensor
+     */
     public Sensor get(Long id) {
         return sensorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
+    
+    /** 
+     * @param id
+     * @param user_id
+     * @return Sensor
+     */
     public Sensor getOneByUser(Long id, Long user_id) {
         userService.get(user_id);
         return sensorRepository.findByIdAndUser_id(id, user_id)
                 .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
+    
+    /** 
+     * @param user_id
+     * @param key
+     * @return List<Sensor>
+     */
     public List<Sensor> getAllByUser(Long user_id, String key) {
         if (key != null) {
             return sensorRepository.search(key, user_id);
@@ -68,6 +91,13 @@ public class SensorService {
             return sensorRepository.findByUser_id(user_id);
     }
 
+    
+    /** 
+     * @param dto
+     * @param id
+     * @param user_id
+     * @return Sensor
+     */
     public Sensor Edit(EditSensorRequest dto, Long id, Long user_id) {
         Sensor sensor = this.getOneByUser(id, user_id);
         if (dto.getName() != null) {
@@ -88,6 +118,12 @@ public class SensorService {
 
     }
 
+    
+    /** 
+     * @param id
+     * @param user_id
+     * @return String
+     */
     public String delete(Long id, Long user_id) {
         Sensor sensor = this.getOneByUser(id, user_id);
         try {
@@ -99,6 +135,12 @@ public class SensorService {
 
     }
 
+    
+    /** 
+     * @param id
+     * @param sRequest
+     * @return List<SensorHistory>
+     */
     public List<SensorHistory> searchHistory(Long id, SearchRequest sRequest) {
         if (sRequest == null)
             return sensorHistoryRepository.findBySensor_id(id);
@@ -117,6 +159,12 @@ public class SensorService {
         }
     }
 
+    
+    /** 
+     * @param sid
+     * @param shr
+     * @return SensorHistory
+     */
     public SensorHistory saveSensorHistory(Long sid, SensorHistoryRequest shr) {
         Sensor sensor = this.get(sid);
         if (!sensor.getUser().getToken().equals(shr.getToken())) {

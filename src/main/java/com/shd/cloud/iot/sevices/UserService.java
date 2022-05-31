@@ -33,6 +33,11 @@ public class UserService {
     @Autowired
     private PasswordEncoder encoder;
 
+    
+    /** 
+     * @param signUpRequest
+     * @return User
+     */
     public User create(SignupRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             throw new DuplicatException("Username");
@@ -73,22 +78,44 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    
+    /** 
+     * @param user_id
+     * @return User
+     * @throws UsernameNotFoundException
+     */
     public User get(Long user_id) throws UsernameNotFoundException {
         User user = userRepository.findById(user_id)
                 .orElseThrow(() -> new NotFoundException("User Not Found with id" + user_id));
         return user;
     }
 
+    
+    /** 
+     * @param username
+     * @return User
+     * @throws UsernameNotFoundException
+     */
     public User getByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("User Not Found with username" + username));
         return user;
     }
 
+    
+    /** 
+     * @return List<User>
+     */
     public List<User> search() {
         return userRepository.findAll();
     }
 
+    
+    /** 
+     * @param user_id
+     * @param request
+     * @return User
+     */
     public User Edit(Long user_id, EditUserRequest request) {
         User user = this.get(user_id);
         if (request.getPassword() != null) {
@@ -118,6 +145,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    
+    /** 
+     * @param id
+     * @return String
+     */
     public String delete(Long id) {
 
         User user = this.get(id);
@@ -130,6 +162,10 @@ public class UserService {
         }
     }
 
+    
+    /** 
+     * @return String
+     */
     private String tokenGenerator() {
         String t = RandomString.make(32);
         while (userRepository.existsByToken(t)) {

@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "locations")
-@JsonIgnoreProperties({"operators", "sensors"})
+@JsonIgnoreProperties({"user", "parent"})
 public class Location {
 
     @Id
@@ -30,7 +30,6 @@ public class Location {
     @Column(length = 20)
     private String type;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -45,7 +44,6 @@ public class Location {
     @JoinColumn(name = "parent_id")
     private Location parent;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "parent")
     private List<Location> children;
 

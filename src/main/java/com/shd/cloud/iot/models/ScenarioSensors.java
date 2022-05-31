@@ -9,10 +9,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
 //effective sensors
-@Entity(name = "senario_sensors")
+@Entity
+@Table(name = "senario_sensors")
+@JsonIgnoreProperties({"sensor", "operator", "scenario"})
 public class ScenarioSensors {
 
     @Id

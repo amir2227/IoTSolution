@@ -21,7 +21,7 @@ import javax.persistence.GenerationType;
 
 @Entity
 @Table(name = "operators", uniqueConstraints = { @UniqueConstraint(columnNames = { "user_id", "name" }) })
-@JsonIgnoreProperties(value = { "histories", "user", "shared" })
+@JsonIgnoreProperties(value = { "histories", "user", "shared", "location" })
 public class Operator {
 
     @Id
@@ -43,11 +43,9 @@ public class Operator {
     @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
     private List<OperatorHistory> histories;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
     private List<ScenarioSensors> scenario_Sensors;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
     private List<ScenarioOperators> scenario_Operators;
 

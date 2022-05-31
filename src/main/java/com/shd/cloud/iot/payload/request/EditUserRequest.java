@@ -18,10 +18,6 @@ public class EditUserRequest {
     private String phone;
 
     @NotBlank
-    @Email
-    private String email;
-
-    @NotBlank
     @Size(min = 6, max = 40)
     private String password;
 
@@ -54,14 +50,6 @@ public class EditUserRequest {
 
     public void setPhone(String phone) {
         this.phone = phone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPassword() {

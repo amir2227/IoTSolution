@@ -49,7 +49,7 @@ public class UserController extends handleValidationExceptions{
     }
 
     @ApiOperation(value = "get all users only 'ADMIN' role")
-    @PreAuthorize("hasAuthority('USER_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("")
     public ResponseEntity<?> getAll() {
         return ResponseEntity.ok(userService.search());
