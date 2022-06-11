@@ -108,6 +108,24 @@ public class OperatorService {
         return operatorRepository.save(operator);
     }
 
+    public void changeState(Long operator_id, boolean state){
+        Operator operator = this.get(operator_id);
+        String topic = "operator/" + operator.getId() + "/" + operator.getUser().getToken();
+        try {
+            if (state)
+                mqttGateway.sendToMqtt(topic, 1, "1");
+            else
+                mqttGateway.sendToMqtt(topic, 1, "0");
+        } catch (Exception e) {
+            System.out.println("mqtt exception: " + e.getMessage());
+            e.printStackTrace();
+        }
+        operator.setState(state);
+        Date date = new Date();
+        OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator);
+        operatorHRepo.save(oh);
+        operatorRepository.save(operator);
+    }
     /**
      * @param oid operator id
      * @param uid shared user id
@@ -213,7 +231,7 @@ public class OperatorService {
         // throw new BadRequestException("this operator have some history. cannot be
         // deleted!");
         // }
-        if (operator.getScenario_Operators().size() > 0 || operator.getScenario_Sensors().size() > 0) {
+        if (operator.getScenario_Operators().size() > 0) {
             throw new BadRequestException("this operator have some scenario. cannot be deleted!");
         }
         try {

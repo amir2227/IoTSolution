@@ -7,11 +7,9 @@ public class ScenarioSensorRequest {
 
     private Long sensor_id;
 
-    private Long operator_id;
-
     private Float[] points;
 
-    @ValidateString(acceptedValues = { "SMALLER", "GREATER", "BETWEEN", "EQUAL", "ON", "OFF" })
+    @ValidateString(acceptedValues = { "SMALLER", "GREATER", "BETWEEN", "EQUAL" })
     private EModality modality;
 
     public Long getSensor_id() {
@@ -20,14 +18,6 @@ public class ScenarioSensorRequest {
 
     public void setSensor_id(Long sensor_id) {
         this.sensor_id = sensor_id;
-    }
-
-    public Long getOperator_id() {
-        return operator_id;
-    }
-
-    public void setOperator_id(Long operator_id) {
-        this.operator_id = operator_id;
     }
 
     public Float[] getPoints() {

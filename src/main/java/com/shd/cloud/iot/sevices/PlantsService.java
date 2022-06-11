@@ -1,6 +1,5 @@
 package com.shd.cloud.iot.sevices;
 
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +28,7 @@ public class PlantsService {
         Matcher matcher = pattern.matcher(key);
         if (matcher.find())
             throw new BadRequestException("invalid search key");
-        Pageable pageable = PageRequest.of(page, 5);
+        Pageable pageable = PageRequest.of(page, 15);
         return plantsRepository.search(key, pageable);
     }
 

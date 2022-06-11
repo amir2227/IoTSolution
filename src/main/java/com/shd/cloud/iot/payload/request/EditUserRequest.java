@@ -1,6 +1,5 @@
 package com.shd.cloud.iot.payload.request;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 

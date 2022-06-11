@@ -63,7 +63,7 @@ public class MqttBeans {
     public MessageChannel mqttOutboundChannel() {
         return new DirectChannel();
     }
- 
+
     /**
      * MQTT Message handler （ producer ）
      **/
@@ -100,13 +100,11 @@ public class MqttBeans {
                 if (topic.startsWith("sensor/")) {
                     try {
                         String t[] = topic.split("/");
-                        System.out.println("This is the topic");
                         List<SensorHistory> sh = sensorService.searchHistory(Long.valueOf(t[1]), null);
                         if (sh.size() > 0) {
                             String data = sh.get(sh.size() - 1).getData();
                             System.out.println("data   -->" + data);
                             if (!data.equals(payload)) {
-                                System.out.println("in if");
                                 SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
                                 sensorService.saveSensorHistory(Long.valueOf(t[1]), sr);
                             }
@@ -118,9 +116,9 @@ public class MqttBeans {
                         e.getMessage();
                     }
                 }
-                 System.out.println("message: " + message.getPayload());
-                 System.out.println("message header: " + message.getHeaders());
-                 System.out.println("message topic: " + topic);
+                System.out.println("message: " + message.getPayload());
+                System.out.println("message header: " + message.getHeaders());
+                System.out.println("message topic: " + topic);
 
             }
 

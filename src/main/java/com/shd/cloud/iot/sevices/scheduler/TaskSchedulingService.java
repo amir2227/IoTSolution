@@ -30,8 +30,6 @@ public class TaskSchedulingService {
         if (scheduledTask != null) {
             scheduledTask.cancel(true);
             jobsMap.put(jobId, null);
-            int a=9;
-            Integer b =9;
         }
     }
 }

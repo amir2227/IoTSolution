@@ -14,7 +14,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.GenerationType;
@@ -42,9 +41,6 @@ public class Operator {
 
     @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
     private List<OperatorHistory> histories;
-
-    @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
-    private List<ScenarioSensors> scenario_Sensors;
 
     @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
     private List<ScenarioOperators> scenario_Operators;
@@ -116,14 +112,6 @@ public class Operator {
 
     public void setHistories(List<OperatorHistory> histories) {
         this.histories = histories;
-    }
-
-    public List<ScenarioSensors> getScenario_Sensors() {
-        return scenario_Sensors;
-    }
-
-    public void setScenario_Sensors(List<ScenarioSensors> scenario_Sensors) {
-        this.scenario_Sensors = scenario_Sensors;
     }
 
     public List<ScenarioOperators> getScenario_Operators() {

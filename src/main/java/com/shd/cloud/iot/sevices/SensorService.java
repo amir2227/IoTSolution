@@ -6,14 +6,22 @@ import java.util.List;
 import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
+import com.shd.cloud.iot.models.EModality;
 import com.shd.cloud.iot.models.Location;
+import com.shd.cloud.iot.models.Operator;
+import com.shd.cloud.iot.models.Scenario;
+import com.shd.cloud.iot.models.ScenarioOperators;
+import com.shd.cloud.iot.models.ScenarioSensors;
 import com.shd.cloud.iot.models.Sensor;
 import com.shd.cloud.iot.models.SensorHistory;
 import com.shd.cloud.iot.models.User;
+import com.shd.cloud.iot.payload.request.EditOperator;
 import com.shd.cloud.iot.payload.request.EditSensorRequest;
 import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
 import com.shd.cloud.iot.payload.request.SensorRequest;
+import com.shd.cloud.iot.repositorys.ScenarioRepository;
+import com.shd.cloud.iot.repositorys.ScenarioSensorsRepository;
 import com.shd.cloud.iot.repositorys.SensorHistoryRepository;
 import com.shd.cloud.iot.repositorys.SensorRepository;
 
@@ -35,8 +43,13 @@ public class SensorService {
     @Autowired
     private SensorHistoryRepository sensorHistoryRepository;
 
-    
-    /** 
+    @Autowired
+    private ScenarioSensorsRepository scenarioSensorsRepository;
+
+    @Autowired
+    private OperatorService operatorService;
+
+    /**
      * @param dto
      * @param user_id
      * @return Sensor
@@ -56,8 +69,7 @@ public class SensorService {
         return sensorRepository.save(sensor);
     }
 
-    
-    /** 
+    /**
      * @param id
      * @return Sensor
      */
@@ -66,8 +78,7 @@ public class SensorService {
                 .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
-    
-    /** 
+    /**
      * @param id
      * @param user_id
      * @return Sensor
@@ -78,8 +89,7 @@ public class SensorService {
                 .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
-    
-    /** 
+    /**
      * @param user_id
      * @param key
      * @return List<Sensor>
@@ -91,8 +101,7 @@ public class SensorService {
             return sensorRepository.findByUser_id(user_id);
     }
 
-    
-    /** 
+    /**
      * @param dto
      * @param id
      * @param user_id
@@ -118,8 +127,7 @@ public class SensorService {
 
     }
 
-    
-    /** 
+    /**
      * @param id
      * @param user_id
      * @return String
@@ -135,8 +143,7 @@ public class SensorService {
 
     }
 
-    
-    /** 
+    /**
      * @param id
      * @param sRequest
      * @return List<SensorHistory>
@@ -159,8 +166,7 @@ public class SensorService {
         }
     }
 
-    
-    /** 
+    /**
      * @param sid
      * @param shr
      * @return SensorHistory
@@ -170,7 +176,78 @@ public class SensorService {
         if (!sensor.getUser().getToken().equals(shr.getToken())) {
             throw new BadRequestException("not valid request");
         }
+        List<ScenarioSensors> scenarioSensors = scenarioSensorsRepository.findBySensor_id(sensor.getId());
+        if (scenarioSensors != null && scenarioSensors.size() > 0) {
+            for (ScenarioSensors s_sensor : scenarioSensors) {
+                if(checkModality(shr.getData(), s_sensor)){
+                    manageScenario(s_sensor);
+                }
+
+            }
+        }
         SensorHistory sensorHistory = new SensorHistory(shr.getData(), new Date().getTime(), sensor);
         return sensorHistoryRepository.save(sensorHistory);
+    }
+
+    private boolean checkModality(String data, ScenarioSensors s_sensor) {
+        float firstPoint = Float.valueOf(s_sensor.getPoints().split(",")[0]);
+        switch (s_sensor.getModality()) {
+            case BETWEEN:
+                float secondPoint = Float.valueOf(s_sensor.getPoints().split(",")[1]);
+                if (Float.valueOf(data) >= firstPoint && Float.valueOf(data) <= secondPoint) {
+                    System.out.println("fuckkkkkkkkkkkkkkkking worrk");
+                    return true;
+                } else {
+                    return false;
+                }
+            case EQUAL:
+                if (Float.valueOf(data).equals(firstPoint)) {
+                    System.out.println("ssssssssssssss===>" + firstPoint);
+                    return true;
+                } else {
+                    return false;
+                }
+            case GREATER:
+                if (Float.valueOf(data) >= firstPoint) {
+                    System.out.println("ssssssssssssss===>" + firstPoint);
+                    return true;
+                } else {
+                    return false;
+                }
+            case SMALLER:
+                if (Float.valueOf(data) <= firstPoint) {
+                    System.out.println("ssssssssssssss===>" + firstPoint);
+                    return true;
+                } else {
+                    return false;
+                }
+            default:
+                return false;
+
+        }
+    }
+
+    private void manageScenario(ScenarioSensors s_sensor) {
+        Scenario scenario = s_sensor.getScenario();
+        List<ScenarioSensors> scenarioSensors = scenario.getEffective_sensors();
+        boolean flag = false;
+        if (scenarioSensors.size() > 0) {
+            for (ScenarioSensors scenarioSensors2 : scenarioSensors) {
+                if (scenarioSensors2.getId() == s_sensor.getId())
+                    continue;
+                int hsize = scenarioSensors2.getSensor().getHistories().size();
+                String data = scenarioSensors2.getSensor().getHistories().get(hsize - 1).getData();
+                if (!checkModality(data, scenarioSensors2)) {
+                    flag = true;
+                }
+
+            }
+            if (!flag) {
+                List<ScenarioOperators> scenarioOperators = scenario.getTarget_operators();
+                for(ScenarioOperators s_operator : scenarioOperators){
+                    operatorService.changeState(s_operator.getOperator().getId(), s_operator.getOperator_state());
+                }
+            }
+        }
     }
 }

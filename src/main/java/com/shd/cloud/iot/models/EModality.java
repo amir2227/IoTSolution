@@ -4,8 +4,6 @@ public enum EModality {
     SMALLER,
     GREATER,
     BETWEEN,
-    EQUAL,
-    ON,
-    OFF
+    EQUAL
 
 }

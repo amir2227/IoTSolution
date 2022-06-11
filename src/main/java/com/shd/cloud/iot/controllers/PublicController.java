@@ -1,6 +1,5 @@
 package com.shd.cloud.iot.controllers;
 
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shd.cloud.iot.models.Plants;
-import com.shd.cloud.iot.payload.response.PlantsIdAndTitle;
 import com.shd.cloud.iot.sevices.PlantsService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)

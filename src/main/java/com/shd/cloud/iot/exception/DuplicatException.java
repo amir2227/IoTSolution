@@ -8,6 +8,6 @@ public class DuplicatException extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
   public DuplicatException(String confield) {
-    super(String.format("%s already in use!", confield));
+    super(String.format(confield));
   }
 }

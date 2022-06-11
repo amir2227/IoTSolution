@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 //effective sensors
 @Entity
-@Table(name = "senario_sensors")
+@Table(name = "scenario_sensors")
 @JsonIgnoreProperties({"sensor", "operator", "scenario"})
 public class ScenarioSensors {
 
@@ -34,10 +34,6 @@ public class ScenarioSensors {
     @ManyToOne
     @JoinColumn(name = "sensor_id", nullable = true)
     private Sensor sensor;
-
-    @ManyToOne
-    @JoinColumn(name = "operator_id", nullable = true)
-    private Operator operator;
 
     @ManyToOne
     @JoinColumn(name = "scenario_id")
@@ -76,14 +72,6 @@ public class ScenarioSensors {
 
     public void setSensor(Sensor sensor) {
         this.sensor = sensor;
-    }
-
-    public Operator getOperator() {
-        return operator;
-    }
-
-    public void setOperator(Operator operator) {
-        this.operator = operator;
     }
 
     public Scenario getScenario() {

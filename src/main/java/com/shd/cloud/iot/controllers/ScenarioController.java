@@ -1,14 +1,11 @@
 package com.shd.cloud.iot.controllers;
 
-import java.util.List;
 
 import javax.validation.Valid;
 
 import com.shd.cloud.iot.exception.handleValidationExceptions;
 import com.shd.cloud.iot.models.Scenario;
 import com.shd.cloud.iot.payload.request.scenarioRequest.ScenarioRequest;
-// import com.shd.cloud.iot.payload.request.ScenarioRequest;
-import com.shd.cloud.iot.payload.response.ScenarioResponse;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.ScenarioService;
 
@@ -28,12 +25,11 @@ public class ScenarioController extends handleValidationExceptions {
     private ScenarioService scenarioService;
 
     @PostMapping("")
-    public ResponseEntity<?> createScenario(@Valid @RequestBody List<ScenarioRequest> body) {
+    public ResponseEntity<?> createScenario(@Valid @RequestBody ScenarioRequest body) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        List<Scenario> scenarios = scenarioService.create(body, userDetails.getId());
-        return ResponseEntity.ok(new ScenarioResponse(scenarios, scenarios.size(),
-                "successfully created!"));
+        Scenario scenario = scenarioService.create(body, userDetails.getId());
+        return ResponseEntity.ok(scenario);
 
     }
 
