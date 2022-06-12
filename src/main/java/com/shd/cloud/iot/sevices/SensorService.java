@@ -6,21 +6,17 @@ import java.util.List;
 import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
-import com.shd.cloud.iot.models.EModality;
 import com.shd.cloud.iot.models.Location;
-import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.Scenario;
 import com.shd.cloud.iot.models.ScenarioOperators;
 import com.shd.cloud.iot.models.ScenarioSensors;
 import com.shd.cloud.iot.models.Sensor;
 import com.shd.cloud.iot.models.SensorHistory;
 import com.shd.cloud.iot.models.User;
-import com.shd.cloud.iot.payload.request.EditOperator;
 import com.shd.cloud.iot.payload.request.EditSensorRequest;
 import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
 import com.shd.cloud.iot.payload.request.SensorRequest;
-import com.shd.cloud.iot.repositorys.ScenarioRepository;
 import com.shd.cloud.iot.repositorys.ScenarioSensorsRepository;
 import com.shd.cloud.iot.repositorys.SensorHistoryRepository;
 import com.shd.cloud.iot.repositorys.SensorRepository;
@@ -144,8 +140,8 @@ public class SensorService {
     }
 
     /**
-     * @param id
-     * @param sRequest
+     * @param id history id
+     * @param sRequest include (key, startDate, endDate)
      * @return List<SensorHistory>
      */
     public List<SensorHistory> searchHistory(Long id, SearchRequest sRequest) {
@@ -167,8 +163,8 @@ public class SensorService {
     }
 
     /**
-     * @param sid
-     * @param shr
+     * @param sid sensor id
+     * @param shr include (data, token)
      * @return SensorHistory
      */
     public SensorHistory saveSensorHistory(Long sid, SensorHistoryRequest shr) {
@@ -179,7 +175,7 @@ public class SensorService {
         List<ScenarioSensors> scenarioSensors = scenarioSensorsRepository.findBySensor_id(sensor.getId());
         if (scenarioSensors != null && scenarioSensors.size() > 0) {
             for (ScenarioSensors s_sensor : scenarioSensors) {
-                if(checkModality(shr.getData(), s_sensor)){
+                if (checkModality(shr.getData(), s_sensor)) {
                     manageScenario(s_sensor);
                 }
 
@@ -195,28 +191,28 @@ public class SensorService {
             case BETWEEN:
                 float secondPoint = Float.valueOf(s_sensor.getPoints().split(",")[1]);
                 if (Float.valueOf(data) >= firstPoint && Float.valueOf(data) <= secondPoint) {
-                    System.out.println("fuckkkkkkkkkkkkkkkking worrk");
+                    System.out.println("data " + data + " is between " + firstPoint + " and " + secondPoint);
                     return true;
                 } else {
                     return false;
                 }
             case EQUAL:
                 if (Float.valueOf(data).equals(firstPoint)) {
-                    System.out.println("ssssssssssssss===>" + firstPoint);
+                    System.out.println("data " + data + " is equal to " + firstPoint);
                     return true;
                 } else {
                     return false;
                 }
             case GREATER:
                 if (Float.valueOf(data) >= firstPoint) {
-                    System.out.println("ssssssssssssss===>" + firstPoint);
+                    System.out.println("data " + data + " is greater than " + firstPoint);
                     return true;
                 } else {
                     return false;
                 }
             case SMALLER:
                 if (Float.valueOf(data) <= firstPoint) {
-                    System.out.println("ssssssssssssss===>" + firstPoint);
+                    System.out.println("data " + data + " is smaller than " + firstPoint);
                     return true;
                 } else {
                     return false;
@@ -232,19 +228,23 @@ public class SensorService {
         List<ScenarioSensors> scenarioSensors = scenario.getEffective_sensors();
         boolean flag = false;
         if (scenarioSensors.size() > 0) {
-            for (ScenarioSensors scenarioSensors2 : scenarioSensors) {
-                if (scenarioSensors2.getId() == s_sensor.getId())
+            for (ScenarioSensors scenarioSensor : scenarioSensors) {
+                if (scenarioSensor.getId() == s_sensor.getId())
                     continue;
-                int hsize = scenarioSensors2.getSensor().getHistories().size();
-                String data = scenarioSensors2.getSensor().getHistories().get(hsize - 1).getData();
-                if (!checkModality(data, scenarioSensors2)) {
+                int hsize = scenarioSensor.getSensor().getHistories().size();
+                String data = scenarioSensor.getSensor().getHistories().get(hsize - 1).getData();
+                if (!checkModality(data, scenarioSensor)) {
+                    // if one sensor scenario return false then this scenario is incomplete
+                    // we change state of scenario operator only when all of scenario sensors return
+                    // true
                     flag = true;
+                    break;
                 }
 
             }
             if (!flag) {
                 List<ScenarioOperators> scenarioOperators = scenario.getTarget_operators();
-                for(ScenarioOperators s_operator : scenarioOperators){
+                for (ScenarioOperators s_operator : scenarioOperators) {
                     operatorService.changeState(s_operator.getOperator().getId(), s_operator.getOperator_state());
                 }
             }

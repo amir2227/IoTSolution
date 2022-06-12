@@ -4,7 +4,7 @@ import java.util.List;
 
 public class ScenarioRequest {
 
-    private String name;
+    private String description;
 
     private List<ScenarioSensorRequest> scenarioSensors;
 
@@ -13,12 +13,12 @@ public class ScenarioRequest {
     public ScenarioRequest() {
     }
 
-    public String getName() {
-        return name;
+    public String getDescription() {
+        return description;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public List<ScenarioSensorRequest> getScenarioSensors() {
