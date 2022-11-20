@@ -1,33 +1,17 @@
 package com.shd.cloud.iot.exception;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Date;
 
+@Getter
+@Setter
+@AllArgsConstructor
 public class ErrorMessage {
-    private int statusCode;
-    private Date timestamp;
-    private String message;
-    private String description;
-
-    public ErrorMessage(int statusCode, Date timestamp, String message, String description) {
-        this.statusCode = statusCode;
-        this.timestamp = timestamp;
-        this.message = message;
-        this.description = description;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getDescription() {
-        return description;
-    }
+    private final int statusCode;
+    private final Date timestamp;
+    private final String message;
+    private final String description;
 }

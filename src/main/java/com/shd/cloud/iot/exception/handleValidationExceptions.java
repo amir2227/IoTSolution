@@ -2,6 +2,8 @@ package com.shd.cloud.iot.exception;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -40,7 +42,7 @@ public class handleValidationExceptions {
     @ExceptionHandler(BindException.class)
     public Map<String, String> handleBindExceptions(BindException ex) {
         Map<String, String> errors = new HashMap<>();
-        errors.put("message", ex.getFieldError().getDefaultMessage());
+        errors.put("message", Objects.requireNonNull(ex.getFieldError()).getDefaultMessage());
         return errors;
     }
 

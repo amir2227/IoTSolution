@@ -2,6 +2,7 @@ package com.shd.cloud.iot.sevices;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
@@ -21,35 +22,20 @@ import com.shd.cloud.iot.repositorys.ScenarioSensorsRepository;
 import com.shd.cloud.iot.repositorys.SensorHistoryRepository;
 import com.shd.cloud.iot.repositorys.SensorRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class SensorService {
+    private final SensorRepository sensorRepository;
+    private final LocationService locationService;
+    private final UserService userService;
+    private final SensorHistoryRepository sensorHistoryRepository;
+    private final ScenarioSensorsRepository scenarioSensorsRepository;
+    private final OperatorService operatorService;
 
-    @Autowired
-    private SensorRepository sensorRepository;
 
-    @Autowired
-    private LocationService locationService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private SensorHistoryRepository sensorHistoryRepository;
-
-    @Autowired
-    private ScenarioSensorsRepository scenarioSensorsRepository;
-
-    @Autowired
-    private OperatorService operatorService;
-
-    /**
-     * @param dto
-     * @param user_id
-     * @return Sensor
-     */
     public Sensor create(SensorRequest dto, Long user_id) {
         User user = userService.get(user_id);
         if (sensorRepository.existsByNameAndUser_id(dto.getName(), user.getId())) {
@@ -65,31 +51,18 @@ public class SensorService {
         return sensorRepository.save(sensor);
     }
 
-    /**
-     * @param id
-     * @return Sensor
-     */
+
     public Sensor get(Long id) {
         return sensorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
-    /**
-     * @param id
-     * @param user_id
-     * @return Sensor
-     */
     public Sensor getOneByUser(Long id, Long user_id) {
         userService.get(user_id);
         return sensorRepository.findByIdAndUser_id(id, user_id)
                 .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
-    /**
-     * @param user_id
-     * @param key
-     * @return List<Sensor>
-     */
     public List<Sensor> getAllByUser(Long user_id, String key) {
         if (key != null) {
             return sensorRepository.search(key, user_id);
@@ -97,12 +70,6 @@ public class SensorService {
             return sensorRepository.findByUser_id(user_id);
     }
 
-    /**
-     * @param dto
-     * @param id
-     * @param user_id
-     * @return Sensor
-     */
     public Sensor Edit(EditSensorRequest dto, Long id, Long user_id) {
         Sensor sensor = this.getOneByUser(id, user_id);
         if (dto.getName() != null) {
@@ -123,11 +90,6 @@ public class SensorService {
 
     }
 
-    /**
-     * @param id
-     * @param user_id
-     * @return String
-     */
     public String delete(Long id, Long user_id) {
         Sensor sensor = this.getOneByUser(id, user_id);
         try {
@@ -182,15 +144,16 @@ public class SensorService {
             }
         }
         SensorHistory sensorHistory = new SensorHistory(shr.getData(), new Date().getTime(), sensor);
-        return sensorHistoryRepository.save(sensorHistory);
+        sensorHistoryRepository.saveAndFlush(sensorHistory);
+        return sensorHistory;
     }
 
     private boolean checkModality(String data, ScenarioSensors s_sensor) {
-        float firstPoint = Float.valueOf(s_sensor.getPoints().split(",")[0]);
+        float firstPoint = Float.parseFloat(s_sensor.getPoints().split(",")[0]);
         switch (s_sensor.getModality()) {
             case BETWEEN:
-                float secondPoint = Float.valueOf(s_sensor.getPoints().split(",")[1]);
-                if (Float.valueOf(data) >= firstPoint && Float.valueOf(data) <= secondPoint) {
+                float secondPoint = Float.parseFloat(s_sensor.getPoints().split(",")[1]);
+                if (Float.parseFloat(data) >= firstPoint && Float.parseFloat(data) <= secondPoint) {
                     System.out.println("data " + data + " is between " + firstPoint + " and " + secondPoint);
                     return true;
                 } else {
@@ -204,14 +167,14 @@ public class SensorService {
                     return false;
                 }
             case GREATER:
-                if (Float.valueOf(data) >= firstPoint) {
+                if (Float.parseFloat(data) >= firstPoint) {
                     System.out.println("data " + data + " is greater than " + firstPoint);
                     return true;
                 } else {
                     return false;
                 }
             case SMALLER:
-                if (Float.valueOf(data) <= firstPoint) {
+                if (Float.parseFloat(data) <= firstPoint) {
                     System.out.println("data " + data + " is smaller than " + firstPoint);
                     return true;
                 } else {
@@ -229,7 +192,7 @@ public class SensorService {
         boolean flag = false;
         if (scenarioSensors.size() > 0) {
             for (ScenarioSensors scenarioSensor : scenarioSensors) {
-                if (scenarioSensor.getId() == s_sensor.getId())
+                if (Objects.equals(scenarioSensor.getId(), s_sensor.getId()))
                     continue;
                 int hsize = scenarioSensor.getSensor().getHistories().size();
                 String data = scenarioSensor.getSensor().getHistories().get(hsize - 1).getData();

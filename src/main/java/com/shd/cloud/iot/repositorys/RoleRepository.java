@@ -2,7 +2,7 @@ package com.shd.cloud.iot.repositorys;
 
 import java.util.Optional;
 
-import com.shd.cloud.iot.models.ERole;
+import com.shd.cloud.iot.enums.ERole;
 import com.shd.cloud.iot.models.Role;
 
 import org.springframework.data.jpa.repository.JpaRepository;

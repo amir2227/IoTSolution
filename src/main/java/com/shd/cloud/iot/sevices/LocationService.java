@@ -9,16 +9,14 @@ import com.shd.cloud.iot.payload.request.EditLocationRequest;
 import com.shd.cloud.iot.payload.request.LocationRequest;
 import com.shd.cloud.iot.repositorys.LocationRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class LocationService {
-    @Autowired
-    private LocationRepository locationRepository;
-
-    @Autowired
-    private UserService userService;
+    private final LocationRepository locationRepository;
+    private final UserService userService;
 
     public Location create(LocationRequest dto, Long user_id) {
         User user = userService.get(user_id);

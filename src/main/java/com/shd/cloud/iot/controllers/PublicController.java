@@ -1,7 +1,7 @@
 package com.shd.cloud.iot.controllers;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,10 +16,10 @@ import com.shd.cloud.iot.sevices.PlantsService;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/plant")
+@RequiredArgsConstructor
 public class PublicController {
 
-    @Autowired
-    private PlantsService plantsService;
+    private final PlantsService plantsService;
 
     @GetMapping("")
     public ResponseEntity<?> search(@RequestParam(name = "key") String key,

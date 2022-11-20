@@ -4,8 +4,8 @@ services:
     image: hivemq/hivemq4
     restart: unless-stopped
     ports:
-      - 192.168.1.184:9090:8080
-      - 192.168.1.184:1884:1883
+      - '9090:8080'
+      - '1884:1883'
     networks:
       - spring-net
   mysqldb:

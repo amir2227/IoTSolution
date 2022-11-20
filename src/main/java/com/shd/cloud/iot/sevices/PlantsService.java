@@ -3,7 +3,7 @@ package com.shd.cloud.iot.sevices;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,11 +16,9 @@ import com.shd.cloud.iot.payload.response.PlantsIdAndTitle;
 import com.shd.cloud.iot.repositorys.PlantsRepository;
 
 @Service
+@RequiredArgsConstructor
 public class PlantsService {
-
-    @Autowired
-    private PlantsRepository plantsRepository;
-
+    private final PlantsRepository plantsRepository;
     final static private String regex = "[a-zA-Z]";
 
     public Page<PlantsIdAndTitle> search(String key, int page) {

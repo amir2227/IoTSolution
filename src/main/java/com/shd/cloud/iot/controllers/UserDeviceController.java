@@ -26,7 +26,7 @@ import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.LocationService;
 import com.shd.cloud.iot.sevices.OperatorService;
 import com.shd.cloud.iot.sevices.SensorService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -42,21 +42,18 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/device")
+@RequiredArgsConstructor
 public class UserDeviceController extends handleValidationExceptions {
-
-    @Autowired
-    private OperatorService operatorService;
-    @Autowired
-    private SensorService sensorService;
-    @Autowired
-    private LocationService locationService;
+    private final OperatorService operatorService;
+    private final SensorService sensorService;
+    private final LocationService locationService;
 
     @GetMapping("")
     public ResponseEntity<?> getUserDevices() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        List<Operator> operators = operatorService.getAllByUser(Long.valueOf(userDetails.getId()), null);
-        List<Sensor> sensors = sensorService.getAllByUser(Long.valueOf(userDetails.getId()), null);
+        List<Operator> operators = operatorService.getAllByUser(userDetails.getId(), null);
+        List<Sensor> sensors = sensorService.getAllByUser(userDetails.getId(), null);
 
         return ResponseEntity.ok(new UserDeviceResponse(operators, sensors));
     }
@@ -66,7 +63,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Operator operator = operatorService.create(body, userDetails.getId());
-        Map<String, Object> res = new HashMap<String, Object>();
+        Map<String, Object> res = new HashMap<>();
         res.put("data", operator);
         res.put("mesage", "successfully created.");
         res.put("status", 200);
@@ -79,7 +76,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         List<Operator> operators = operatorService.getAllByUser(userDetails.getId(), key);
-        Map<String, Object> res = new HashMap<String, Object>();
+        Map<String, Object> res = new HashMap<>();
         res.put("data", operators);
         res.put("count", operators.size());
         res.put("status", 200);
@@ -171,7 +168,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Location location = locationService.create(body, userDetails.getId());
-        Map<String, Object> res = new HashMap<String, Object>();
+        Map<String, Object> res = new HashMap<>();
         res.put("data", location);
         res.put("mesage", "successfully created.");
         res.put("status", 200);
@@ -184,7 +181,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         List<Location> locations = locationService.search(userDetails.getId(), key);
-        Map<String, Object> res = new HashMap<String, Object>();
+        Map<String, Object> res = new HashMap<>();
         res.put("data", locations);
         res.put("count", locations.size());
         res.put("status", 200);

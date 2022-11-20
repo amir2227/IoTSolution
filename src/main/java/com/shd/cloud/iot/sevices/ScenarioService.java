@@ -2,11 +2,12 @@ package com.shd.cloud.iot.sevices;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
-import com.shd.cloud.iot.models.EModality;
+import com.shd.cloud.iot.enums.EModality;
 import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.Scenario;
 import com.shd.cloud.iot.models.ScenarioOperators;
@@ -20,35 +21,19 @@ import com.shd.cloud.iot.repositorys.ScenarioOperatorsRepository;
 import com.shd.cloud.iot.repositorys.ScenarioRepository;
 import com.shd.cloud.iot.repositorys.ScenarioSensorsRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ScenarioService {
+    private final ScenarioRepository scenarioRepo;
+    private final ScenarioOperatorsRepository scenarioOperatorsRepo;
+    private final ScenarioSensorsRepository scenarioSensorsRepo;
+    private final OperatorService operatorService;
+    private final SensorService sensorService;
+    private final UserService userService;
 
-    @Autowired
-    private ScenarioRepository scenarioRepo;
-
-    @Autowired
-    private ScenarioOperatorsRepository scenarioOperatorsRepo;
-
-    @Autowired
-    private ScenarioSensorsRepository scenarioSensorsRepo;
-
-    @Autowired
-    private OperatorService operatorService;
-
-    @Autowired
-    private SensorService sensorService;
-
-    @Autowired
-    private UserService userService;
-
-    /**
-     * @param scenario
-     * @param user_id
-     * @return List<Scenario>
-     */
     public Scenario create(ScenarioRequest scenario, Long user_id) {
 
         if (scenario == null) {
@@ -80,7 +65,7 @@ public class ScenarioService {
                 if (s_sensor.getPoints()[0] >= s_sensor.getPoints()[1]) {
                     throw new BadRequestException("first point must smaller than second one");
                 }
-                scenarioSensor.setPoints(String.valueOf(s_sensor.getPoints()[0] + "," + s_sensor.getPoints()[1]));
+                scenarioSensor.setPoints(s_sensor.getPoints()[0] + "," + s_sensor.getPoints()[1]);
 
             } else if (s_sensor.getPoints().length == 1) {
                 if (s_sensor.getModality().equals(EModality.BETWEEN)) {
@@ -113,18 +98,12 @@ public class ScenarioService {
 
     }
 
-    /**
-     * @param scenarioRequest
-     * @param scenario_id
-     * @param user_id
-     * @return Scenario
-     */
     public Scenario add(ScenarioRequest scenarioRequest, Long scenario_id, Long user_id) {
         Scenario scenario = this.get(scenario_id);
         if (scenarioRequest == null) {
             throw new BadRequestException("there is no scenario");
         }
-        if (scenario.getUser().getId() != user_id)
+        if (!Objects.equals(scenario.getUser().getId(), user_id))
             throw new BadRequestException("access denied");
         if (scenarioRequest.getDescription() != null)
             scenario.setDescription(scenarioRequest.getDescription());
@@ -151,7 +130,7 @@ public class ScenarioService {
                     if (s_sensor.getPoints()[0] >= s_sensor.getPoints()[1]) {
                         throw new BadRequestException("first point must smaller than second one");
                     }
-                    scenarioSensor.setPoints(String.valueOf(s_sensor.getPoints()[0] + "," + s_sensor.getPoints()[1]));
+                    scenarioSensor.setPoints(s_sensor.getPoints()[0] + "," + s_sensor.getPoints()[1]);
 
                 } else if (s_sensor.getPoints().length == 1) {
                     if (s_sensor.getModality().equals(EModality.BETWEEN)) {
@@ -190,31 +169,19 @@ public class ScenarioService {
         return scenarioRepo.save(scenario);
     }
 
-    /**
-     * @param user_id
-     * @return List<Scenario>
-     */
     public List<Scenario> getAll(Long user_id) {
         return scenarioRepo.findByUser_id(user_id);
     }
 
-    /**
-     * @param id
-     * @return Scenario
-     */
+
     public Scenario get(Long id) {
         return scenarioRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("not found scenario with id " + id));
     }
 
-    /**
-     * @param id
-     * @param user_id
-     * @return String
-     */
     public String delete(Long id, Long user_id) {
         Scenario scenario = this.get(id);
-        if (scenario.getUser().getId() != user_id)
+        if (!Objects.equals(scenario.getUser().getId(), user_id))
             throw new BadRequestException("access denied");
         try {
             scenarioRepo.delete(scenario);
@@ -224,10 +191,6 @@ public class ScenarioService {
         }
     }
 
-    /**
-     * @param id
-     * @return String
-     */
     public String deleteScnarioSensor(Long id) {
         ScenarioSensors scenarioSensor = scenarioSensorsRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("not found scenario sensor with id " + id));
@@ -239,10 +202,6 @@ public class ScenarioService {
         }
     }
 
-    /**
-     * @param id
-     * @return String
-     */
     public String deleteScnarioOperator(Long id) {
         ScenarioOperators scenarioOperator = scenarioOperatorsRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("not found scenario operator with id " + id));

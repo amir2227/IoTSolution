@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  hivemq:
+    image: hivemq/hivemq4
+    restart: unless-stopped
+    ports:
+      - '2020:8080'
+      - '1883:1883'
+    environment:
+      JAVA_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30"
+    healthcheck:
+      test: [ "CMD", "echo", "\"\"", ">", "/dev/tcp/127.0.0.1/1883" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10

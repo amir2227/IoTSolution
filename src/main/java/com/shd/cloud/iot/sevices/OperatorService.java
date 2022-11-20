@@ -12,41 +12,28 @@ import com.shd.cloud.iot.models.Location;
 import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.models.OperatorHistory;
 import com.shd.cloud.iot.models.User;
-import com.shd.cloud.iot.mqtt.config.MqttGateway;
+import com.shd.cloud.iot.config.mqtt.config.MqttGateway;
 import com.shd.cloud.iot.payload.request.EditOperator;
 import com.shd.cloud.iot.payload.request.OperatorRequest;
 import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.repositorys.OperatorHistoryRepository;
 import com.shd.cloud.iot.repositorys.OperatorRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class OperatorService {
-
-    @Autowired
-    private OperatorRepository operatorRepository;
-
-    @Autowired
-    private OperatorHistoryRepository operatorHRepo;
-
-    @Autowired
-    private LocationService locationService;
-
-    @Autowired
-    private UserService userService;
+    private final OperatorRepository operatorRepository;
+    private final OperatorHistoryRepository operatorHRepo;
+    private final LocationService locationService;
+    private final UserService userService;
 
     @Resource
     private MqttGateway mqttGateway;
-    // @Autowired
-    // private MqttService mqttService;
 
-    /**
-     * @param dto
-     * @param user_id
-     * @return Operator
-     */
+
     public Operator create(OperatorRequest dto, Long user_id) {
         User user = userService.get(user_id);
         System.out.println(user);
@@ -67,12 +54,6 @@ public class OperatorService {
 
     }
 
-    /**
-     * @param dto
-     * @param id
-     * @param user_id
-     * @return Operator
-     */
     public Operator Edit(EditOperator dto, Long id, Long user_id) {
         Operator operator = this.getOneByUser(id, user_id);
         if (dto.getState() != null) {
@@ -134,7 +115,6 @@ public class OperatorService {
     public boolean changeStatebySharedUser(Long oid, Long uid, boolean state) {
         User user = userService.get(uid);
         Operator operator = this.get(oid);
-        boolean res = false;
 
         if (!operator.getShared().getTarget_users().contains(user))
             throw new BadRequestException("access denied");
@@ -144,29 +124,18 @@ public class OperatorService {
             mqttGateway.sendToMqtt(topic, 1, String.valueOf(state));
             operator.setState(state);
             operatorRepository.save(operator);
-            res = true;
         } catch (Exception e) {
-            res = false;
             throw new BadRequestException(e.getMessage());
 
         }
-        return res;
+        return true;
     }
 
-    /**
-     * @param id
-     * @return Operator
-     */
     public Operator get(Long id) {
         return operatorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Operator Not Found with id " + id));
     }
 
-    /**
-     * @param user_id
-     * @param key
-     * @return List<Operator>
-     */
     public List<Operator> getAllByUser(Long user_id, String key) {
         // userService.get(user_id);
         if (key != null) {
@@ -176,22 +145,12 @@ public class OperatorService {
         }
     }
 
-    /**
-     * @param id
-     * @param user_id
-     * @return Operator
-     */
     public Operator getOneByUser(Long id, Long user_id) {
         // userService.get(user_id);
         return operatorRepository.findByIdAndUser_id(id, user_id)
                 .orElseThrow(() -> new NotFoundException("Operator Not Found or Not this user operator"));
     }
 
-    /**
-     * @param id
-     * @param token
-     * @return Operator
-     */
     public Operator getByToken(Long id, String token) {
         Operator op = this.get(id);
         if (!op.getUser().getToken().equals(token)) {
@@ -200,11 +159,6 @@ public class OperatorService {
         return op;
     }
 
-    /**
-     * @param id
-     * @param searchRequest
-     * @return List<OperatorHistory>
-     */
     public List<OperatorHistory> searchHistories(Long id, SearchRequest searchRequest) {
         this.get(id);
         if (searchRequest.getStartDate() != null) {
@@ -220,11 +174,6 @@ public class OperatorService {
 
     }
 
-    /**
-     * @param id
-     * @param user_id
-     * @return String
-     */
     public String delete(Long id, Long user_id) {
         Operator operator = this.getOneByUser(id, user_id);
         // if (operator.getHistories().size() > 0) {

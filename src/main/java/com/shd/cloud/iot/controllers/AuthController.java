@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import com.shd.cloud.iot.exception.handleValidationExceptions;
@@ -19,11 +18,12 @@ import com.shd.cloud.iot.sevices.UserService;
 import com.shd.cloud.iot.sevices.scheduler.TaskDefinitionBean;
 import com.shd.cloud.iot.sevices.scheduler.TaskSchedulingService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,19 +36,13 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController extends handleValidationExceptions {
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    UserService userService;
-    @Autowired
-    JwtUtils jwtUtils;
-
-    @Autowired
-    private TaskSchedulingService taskSchedulingService;
-
-    @Autowired
-    private TaskDefinitionBean taskDefinitionBean;
+    private final AuthenticationManager authenticationManager;
+    private final UserService userService;
+    private final JwtUtils jwtUtils;
+    private final TaskSchedulingService taskSchedulingService;
+    private final TaskDefinitionBean taskDefinitionBean;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -59,8 +53,8 @@ public class AuthController extends handleValidationExceptions {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+                .map(GrantedAuthority::getAuthority)
+                .toList();
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
                 userDetails.getUsername(),

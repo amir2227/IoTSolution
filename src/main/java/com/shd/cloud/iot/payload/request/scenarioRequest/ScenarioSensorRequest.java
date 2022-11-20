@@ -1,6 +1,6 @@
 package com.shd.cloud.iot.payload.request.scenarioRequest;
 
-import com.shd.cloud.iot.models.EModality;
+import com.shd.cloud.iot.enums.EModality;
 import com.shd.cloud.iot.validator.ValidateString;
 
 public class ScenarioSensorRequest {

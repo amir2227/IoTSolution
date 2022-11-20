@@ -5,8 +5,8 @@ import javax.validation.Valid;
 
 import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.handleValidationExceptions;
-import com.shd.cloud.iot.mqtt.config.MqttGateway;
-import com.shd.cloud.iot.mqtt.model.MqttPublishModel;
+import com.shd.cloud.iot.config.mqtt.config.MqttGateway;
+import com.shd.cloud.iot.config.mqtt.model.MqttPublishModel;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.http.ResponseEntity;

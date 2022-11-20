@@ -1,5 +1,7 @@
 package com.shd.cloud.iot.models;
 
+import com.shd.cloud.iot.enums.ERole;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;

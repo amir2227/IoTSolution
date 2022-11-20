@@ -18,7 +18,7 @@ public class Plants {
     @Column(length = 255)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "text")
     private String content;
 
     public Plants() {

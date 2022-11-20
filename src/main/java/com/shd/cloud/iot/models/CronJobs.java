@@ -10,11 +10,18 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "cron_jobs")
+@Table(name = "t_cron_jobs")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class CronJobs {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,44 +36,4 @@ public class CronJobs {
     @ManyToOne
     @JoinColumn(name = "operator_id")
     private Operator operator;
-
-    public CronJobs(String cronExpression, Boolean state, Operator operator) {
-        this.cronExpression = cronExpression;
-        this.state = state;
-        this.operator = operator;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCronExpression() {
-        return cronExpression;
-    }
-
-    public void setCronExpression(String cronExpression) {
-        this.cronExpression = cronExpression;
-    }
-
-    public Boolean getState() {
-        return state;
-    }
-
-    public void setState(Boolean state) {
-        this.state = state;
-    }
-
-    public Operator getOperator() {
-        return operator;
-    }
-
-    public void setOperator(Operator operator) {
-        this.operator = operator;
-    }
-
-    
 }

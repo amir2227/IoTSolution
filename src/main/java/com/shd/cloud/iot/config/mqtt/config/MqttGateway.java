@@ -1,4 +1,4 @@
-package com.shd.cloud.iot.mqtt.config;
+package com.shd.cloud.iot.config.mqtt.config;
 
 
 import org.springframework.integration.annotation.MessagingGateway;

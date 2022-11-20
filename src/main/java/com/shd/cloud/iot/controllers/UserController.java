@@ -8,7 +8,7 @@ import com.shd.cloud.iot.payload.request.EditUserRequest;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.UserService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,10 +25,9 @@ import io.swagger.annotations.ApiOperation;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class UserController extends handleValidationExceptions{
-
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @ApiOperation(value = "edit user profile")
     @PatchMapping("")

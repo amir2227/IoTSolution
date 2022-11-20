@@ -7,7 +7,7 @@ import com.shd.cloud.iot.models.Scenario;
 import com.shd.cloud.iot.payload.request.scenarioRequest.ScenarioRequest;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.ScenarioService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,10 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/scenario")
+@RequiredArgsConstructor
 public class ScenarioController extends handleValidationExceptions {
-
-    @Autowired
-    private ScenarioService scenarioService;
+    private final ScenarioService scenarioService;
 
     @PostMapping("")
     public ResponseEntity<?> createScenario(@Valid @RequestBody ScenarioRequest body) {

@@ -8,7 +8,7 @@ import java.util.List;
 import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
-import com.shd.cloud.iot.models.ERole;
+import com.shd.cloud.iot.enums.ERole;
 import com.shd.cloud.iot.models.Role;
 import com.shd.cloud.iot.models.User;
 import com.shd.cloud.iot.payload.request.EditUserRequest;
@@ -16,7 +16,7 @@ import com.shd.cloud.iot.payload.request.SignupRequest;
 import com.shd.cloud.iot.repositorys.RoleRepository;
 import com.shd.cloud.iot.repositorys.UserRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,20 +24,15 @@ import org.springframework.stereotype.Service;
 import net.bytebuddy.utility.RandomString;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
-    private PasswordEncoder encoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder encoder;
 
     
-    /** 
-     * @param signUpRequest
-     * @return User
-     */
+
     public User create(SignupRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             throw new DuplicatException("Username");
@@ -59,16 +54,14 @@ public class UserService {
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
+                if ("admin".equals(role)) {
+                    Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    roles.add(adminRole);
+                } else {
+                    Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    roles.add(userRole);
                 }
             });
         }
@@ -78,44 +71,22 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    
-    /** 
-     * @param user_id
-     * @return User
-     * @throws UsernameNotFoundException
-     */
+
     public User get(Long user_id) throws UsernameNotFoundException {
-        User user = userRepository.findById(user_id)
+        return userRepository.findById(user_id)
                 .orElseThrow(() -> new NotFoundException("User Not Found with id" + user_id));
-        return user;
     }
 
-    
-    /** 
-     * @param username
-     * @return User
-     * @throws UsernameNotFoundException
-     */
+
     public User getByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+        return userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("User Not Found with username" + username));
-        return user;
     }
 
-    
-    /** 
-     * @return List<User>
-     */
     public List<User> search() {
         return userRepository.findAll();
     }
 
-    
-    /** 
-     * @param user_id
-     * @param request
-     * @return User
-     */
     public User Edit(Long user_id, EditUserRequest request) {
         User user = this.get(user_id);
         if (request.getPassword() != null) {
@@ -145,11 +116,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    
-    /** 
-     * @param id
-     * @return String
-     */
+
     public String delete(Long id) {
 
         User user = this.get(id);
@@ -162,10 +129,6 @@ public class UserService {
         }
     }
 
-    
-    /** 
-     * @return String
-     */
     private String tokenGenerator() {
         String t = RandomString.make(32);
         while (userRepository.existsByToken(t)) {

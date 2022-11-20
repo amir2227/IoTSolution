@@ -4,16 +4,16 @@ import com.shd.cloud.iot.models.Operator;
 import com.shd.cloud.iot.payload.request.CronRequest;
 import com.shd.cloud.iot.sevices.OperatorService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class TaskDefinitionBean implements Runnable {
 
     private CronRequest cronRequest;
 
-    @Autowired
-    private OperatorService operatorService;
+    private final OperatorService operatorService;
 
     @Override
     public void run() {
