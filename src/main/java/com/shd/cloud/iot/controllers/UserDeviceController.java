@@ -19,13 +19,11 @@ import com.shd.cloud.iot.payload.request.LocationRequest;
 import com.shd.cloud.iot.payload.request.OperatorRequest;
 import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.payload.request.SensorRequest;
-import com.shd.cloud.iot.payload.response.MessageResponse;
-import com.shd.cloud.iot.payload.response.SearchResponse;
-import com.shd.cloud.iot.payload.response.UserDeviceResponse;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.LocationService;
 import com.shd.cloud.iot.sevices.OperatorService;
 import com.shd.cloud.iot.sevices.SensorService;
+import com.shd.cloud.iot.utils.ResponseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,8 +52,7 @@ public class UserDeviceController extends handleValidationExceptions {
                 .getPrincipal();
         List<Operator> operators = operatorService.getAllByUser(userDetails.getId(), null);
         List<Sensor> sensors = sensorService.getAllByUser(userDetails.getId(), null);
-
-        return ResponseEntity.ok(new UserDeviceResponse(operators, sensors));
+        return ResponseEntity.ok(ResponseMapper.map(sensors,operators));
     }
 
     @PostMapping("/operator")
@@ -63,11 +60,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Operator operator = operatorService.create(body, userDetails.getId());
-        Map<String, Object> res = new HashMap<>();
-        res.put("data", operator);
-        res.put("mesage", "successfully created.");
-        res.put("status", 200);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(ResponseMapper.map(operator));
 
     }
 
@@ -76,20 +69,14 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         List<Operator> operators = operatorService.getAllByUser(userDetails.getId(), key);
-        Map<String, Object> res = new HashMap<>();
-        res.put("data", operators);
-        res.put("count", operators.size());
-        res.put("status", 200);
-        return ResponseEntity.ok(res);
-
+        return ResponseEntity.ok(ResponseMapper.map(operators));
     }
 
     @GetMapping("/operator/{id}")
     public ResponseEntity<?> getOneOperator(@PathVariable("id") Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-
-        return ResponseEntity.ok(operatorService.getOneByUser(id, userDetails.getId()));
+        return ResponseEntity.ok(ResponseMapper.map(operatorService.getOneByUser(id, userDetails.getId())));
     }
 
     @PatchMapping("/operator/{id}")
@@ -97,7 +84,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Operator operator = operatorService.Edit(body, id, userDetails.getId());
-        return ResponseEntity.ok(operator);
+        return ResponseEntity.ok(ResponseMapper.map(operator));
 
     }
 
@@ -106,20 +93,20 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         String result = operatorService.delete(id, userDetails.getId());
-        return ResponseEntity.ok(new MessageResponse(result));
+        return ResponseEntity.ok(ResponseMapper.map(result));
     }
 
     @GetMapping("/operator/{id}/history")
     public ResponseEntity<?> getOperatorHistory(@PathVariable("id") Long id, @Valid SearchRequest sRequest) {
         List<OperatorHistory> sh = operatorService.searchHistories(id, sRequest);
-        return ResponseEntity.ok(new SearchResponse(sh, sh.size()));
+        return ResponseEntity.ok(ResponseMapper.map(sh));
     }
 
     @PostMapping("/sensor")
     public ResponseEntity<?> createSensor(@Valid @RequestBody SensorRequest body) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        return ResponseEntity.ok(sensorService.create(body, userDetails.getId()));
+        return ResponseEntity.ok(ResponseMapper.map(sensorService.create(body, userDetails.getId())));
 
     }
 
@@ -128,7 +115,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         List<Sensor> sensors = sensorService.getAllByUser(userDetails.getId(), key);
-        return ResponseEntity.ok(sensors);
+        return ResponseEntity.ok(ResponseMapper.map(sensors));
 
     }
 
@@ -137,7 +124,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Sensor sensor = sensorService.Edit(body, id, userDetails.getId());
-        return ResponseEntity.ok(sensor);
+        return ResponseEntity.ok(ResponseMapper.map(sensor));
 
     }
 
@@ -145,8 +132,7 @@ public class UserDeviceController extends handleValidationExceptions {
     public ResponseEntity<?> getOneSensor(@PathVariable("id") Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-
-        return ResponseEntity.ok(sensorService.getOneByUser(id, userDetails.getId()));
+        return ResponseEntity.ok(ResponseMapper.map(sensorService.getOneByUser(id, userDetails.getId())));
     }
 
     @DeleteMapping("/sensor/{id}")
@@ -154,13 +140,13 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         String result = sensorService.delete(id, userDetails.getId());
-        return ResponseEntity.ok(new MessageResponse(result));
+        return ResponseEntity.ok(ResponseMapper.map(result));
     }
 
     @GetMapping("/sensor/{id}/history")
     public ResponseEntity<?> getSensorHistory(@PathVariable("id") Long id, @Valid SearchRequest sRequest) {
         List<SensorHistory> sh = sensorService.searchHistory(id, sRequest);
-        return ResponseEntity.ok(new SearchResponse(sh, sh.size()));
+        return ResponseEntity.ok(ResponseMapper.map(sh));
     }
 
     @PostMapping("/location")
@@ -168,11 +154,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Location location = locationService.create(body, userDetails.getId());
-        Map<String, Object> res = new HashMap<>();
-        res.put("data", location);
-        res.put("mesage", "successfully created.");
-        res.put("status", 200);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(ResponseMapper.map(location));
 
     }
 
@@ -181,11 +163,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         List<Location> locations = locationService.search(userDetails.getId(), key);
-        Map<String, Object> res = new HashMap<>();
-        res.put("data", locations);
-        res.put("count", locations.size());
-        res.put("status", 200);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(ResponseMapper.map(locations));
 
     }
 
@@ -194,7 +172,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
 
-        return ResponseEntity.ok(locationService.getByUser(id, userDetails.getId()));
+        return ResponseEntity.ok(ResponseMapper.map(locationService.getByUser(id, userDetails.getId())));
     }
 
     @PatchMapping("/location/{id}")
@@ -202,7 +180,7 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Location location = locationService.edit(id, userDetails.getId(), body);
-        return ResponseEntity.ok(location);
+        return ResponseEntity.ok(ResponseMapper.map(location));
 
     }
 
@@ -211,6 +189,6 @@ public class UserDeviceController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         String result = locationService.delete(id, userDetails.getId());
-        return ResponseEntity.ok(new MessageResponse(result));
+        return ResponseEntity.ok(ResponseMapper.map(result));
     }
 }

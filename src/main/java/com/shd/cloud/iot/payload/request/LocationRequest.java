@@ -1,10 +1,16 @@
 package com.shd.cloud.iot.payload.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 public class LocationRequest {
-
     @NotBlank
     @Size(min = 3, max = 20)
     private String name;
@@ -14,32 +20,4 @@ public class LocationRequest {
     private String type;
 
     private Long parent_id;
-
-    public LocationRequest() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Long getParent_id() {
-        return parent_id;
-    }
-
-    public void setParent_id(Long parent_id) {
-        this.parent_id = parent_id;
-    }
-
 }

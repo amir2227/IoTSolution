@@ -1,9 +1,18 @@
 package com.shd.cloud.iot.payload.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class OperatorRequest {
 
     @NotBlank
@@ -16,32 +25,4 @@ public class OperatorRequest {
 
     @Min(1)
     private Long location_id;
-
-    public OperatorRequest() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Long getLocation_id() {
-        return location_id;
-    }
-
-    public void setLocation_id(Long location_id) {
-        this.location_id = location_id;
-    }
-
 }

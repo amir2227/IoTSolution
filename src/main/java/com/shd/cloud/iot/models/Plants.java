@@ -10,17 +10,13 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "plants")
 public class Plants {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     @Column(length = 255)
     private String title;
-
     @Column(columnDefinition = "text")
     private String content;
-
     public Plants() {
     }
 

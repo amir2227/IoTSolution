@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class StartUp {
     private final RoleRepository repo;
-
     @EventListener
     public void appReady(ApplicationReadyEvent event) {
         long roles = repo.count();

@@ -48,12 +48,10 @@ public class OperatorService {
         operator.setUser(user);
         operator = operatorRepository.save(operator);
         Date date = new Date();
-        OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator);
+        OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator.getId());
         operatorHRepo.save(oh);
         return operator;
-
     }
-
     public Operator Edit(EditOperator dto, Long id, Long user_id) {
         Operator operator = this.getOneByUser(id, user_id);
         if (dto.getState() != null) {
@@ -69,7 +67,7 @@ public class OperatorService {
             }
             operator.setState(dto.getState());
             Date date = new Date();
-            OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator);
+            OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator.getId());
             operatorHRepo.save(oh);
 
         }
@@ -103,7 +101,7 @@ public class OperatorService {
         }
         operator.setState(state);
         Date date = new Date();
-        OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator);
+        OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator.getId());
         operatorHRepo.save(oh);
         operatorRepository.save(operator);
     }

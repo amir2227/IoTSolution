@@ -8,6 +8,7 @@ import com.shd.cloud.iot.payload.request.EditUserRequest;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.UserService;
 
+import com.shd.cloud.iot.utils.ResponseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,8 +35,8 @@ public class UserController extends handleValidationExceptions{
     public ResponseEntity<?> edit(@Valid @RequestBody EditUserRequest request) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        User result = userService.Edit(userDetails.getId(), request);
-        return ResponseEntity.ok(result);
+        User user = userService.Edit(userDetails.getId(), request);
+        return ResponseEntity.ok(ResponseMapper.map(user));
     }
 
     @ApiOperation(value = "user profile")
@@ -43,15 +44,15 @@ public class UserController extends handleValidationExceptions{
     public ResponseEntity<?> get() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        User result = userService.get(userDetails.getId());
-        return ResponseEntity.ok(result);
+        User user = userService.get(userDetails.getId());
+        return ResponseEntity.ok(ResponseMapper.map(user));
     }
 
     @ApiOperation(value = "get all users only 'ADMIN' role")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("")
     public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(userService.search());
+        return ResponseEntity.ok(ResponseMapper.map(userService.search()));
     }
 
 }

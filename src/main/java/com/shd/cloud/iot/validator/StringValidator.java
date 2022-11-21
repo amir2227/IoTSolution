@@ -12,7 +12,7 @@ public class StringValidator implements ConstraintValidator<ValidateString, Stri
 
     @Override
     public void initialize(ValidateString constraintAnnotation) {
-        valueList = new ArrayList<String>();
+        valueList = new ArrayList<>();
         for (String val : constraintAnnotation.acceptedValues()) {
             valueList.add(val.toUpperCase());
         }

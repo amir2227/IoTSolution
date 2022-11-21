@@ -1,8 +1,7 @@
 package com.shd.cloud.iot.controllers;
 
-import java.util.HashMap;
+import java.net.URI;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import javax.validation.Valid;
 
@@ -11,13 +10,13 @@ import com.shd.cloud.iot.models.User;
 import com.shd.cloud.iot.payload.request.CronRequest;
 import com.shd.cloud.iot.payload.request.LoginRequest;
 import com.shd.cloud.iot.payload.request.SignupRequest;
-import com.shd.cloud.iot.payload.response.JwtResponse;
 import com.shd.cloud.iot.security.jwt.JwtUtils;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.UserService;
 import com.shd.cloud.iot.sevices.scheduler.TaskDefinitionBean;
 import com.shd.cloud.iot.sevices.scheduler.TaskSchedulingService;
 
+import com.shd.cloud.iot.utils.ResponseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -55,21 +54,13 @@ public class AuthController extends handleValidationExceptions {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getPhone(),
-                roles));
+        return ResponseEntity.ok(ResponseMapper.map(jwt,userDetails,roles));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         User user = userService.create(signUpRequest);
-        Map<String, Object> res = new HashMap<>();
-        res.put("data", user);
-        res.put("mesage", "successfully created.");
-        res.put("status", 200);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.created(URI.create("/api/auth/signup")).body(ResponseMapper.map(user));
     }
 
     @PostMapping(path="/taskdef", consumes = "application/json", produces="application/json")

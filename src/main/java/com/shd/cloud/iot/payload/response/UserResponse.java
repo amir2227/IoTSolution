@@ -1,17 +1,18 @@
 package com.shd.cloud.iot.payload.response;
 
+import com.shd.cloud.iot.models.Role;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
-public class JwtResponse {
-    private String token;
-    private String type = "Bearer";
+public class UserResponse {
     private Long id;
     private String username;
+    private String fullname;
     private String phone;
-    private List<String> roles;
+    private String token;
+    private Set<Role> roles;
 }

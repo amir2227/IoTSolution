@@ -84,8 +84,8 @@ public class SensorService {
             sensor.setLocation(location);
             // }
         }
-        sensorHistoryRepository.save(new SensorHistory("10", new Date().getTime(), sensor));
-        sensorHistoryRepository.save(new SensorHistory("11", new Date().getTime(), sensor));
+        sensorHistoryRepository.save(new SensorHistory("10", new Date().getTime(), sensor.getId()));
+        sensorHistoryRepository.save(new SensorHistory("11", new Date().getTime(), sensor.getId()));
         return sensorRepository.save(sensor);
 
     }
@@ -143,9 +143,9 @@ public class SensorService {
 
             }
         }
-        SensorHistory sensorHistory = new SensorHistory(shr.getData(), new Date().getTime(), sensor);
-        sensorHistoryRepository.saveAndFlush(sensorHistory);
-        return sensorHistory;
+        SensorHistory sensorHistory = new SensorHistory(shr.getData(), new Date().getTime(), sensor.getId());
+
+        return sensorHistoryRepository.save(sensorHistory);
     }
 
     private boolean checkModality(String data, ScenarioSensors s_sensor) {
@@ -194,8 +194,9 @@ public class SensorService {
             for (ScenarioSensors scenarioSensor : scenarioSensors) {
                 if (Objects.equals(scenarioSensor.getId(), s_sensor.getId()))
                     continue;
-                int hsize = scenarioSensor.getSensor().getHistories().size();
-                String data = scenarioSensor.getSensor().getHistories().get(hsize - 1).getData();
+                List<SensorHistory> sensorHistories = sensorHistoryRepository.findBySensor_id(scenarioSensor.getSensor().getId());
+                int hsize = sensorHistories.size();
+                String data = sensorHistories.get(hsize - 1).getData();
                 if (!checkModality(data, scenarioSensor)) {
                     // if one sensor scenario return false then this scenario is incomplete
                     // we change state of scenario operator only when all of scenario sensors return

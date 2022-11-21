@@ -45,9 +45,6 @@ public class Operator {
     private String type;
 
     @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
-    private List<OperatorHistory> histories;
-
-    @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
     private List<ScenarioOperators> scenario_Operators;
 
     @ManyToOne
