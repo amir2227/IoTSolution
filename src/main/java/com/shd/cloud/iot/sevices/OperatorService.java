@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import com.shd.cloud.iot.enums.DeviceStatus;
 import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
@@ -36,7 +37,6 @@ public class OperatorService {
 
     public Operator create(OperatorRequest dto, Long user_id) {
         User user = userService.get(user_id);
-        System.out.println(user);
         if (operatorRepository.existsByNameAndUser_id(dto.getName(), user.getId())) {
             throw new DuplicatException(dto.getName() + " with user id " + user.getId());
         }
@@ -46,9 +46,9 @@ public class OperatorService {
             operator.setLocation(loc);
         }
         operator.setUser(user);
+        operator.setStatus(DeviceStatus.RED);
         operator = operatorRepository.save(operator);
-        Date date = new Date();
-        OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator.getId());
+        OperatorHistory oh = new OperatorHistory(operator.getState(), operator.getId());
         operatorHRepo.save(oh);
         return operator;
     }
@@ -66,8 +66,7 @@ public class OperatorService {
                 e.printStackTrace();
             }
             operator.setState(dto.getState());
-            Date date = new Date();
-            OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator.getId());
+            OperatorHistory oh = new OperatorHistory(operator.getState(), operator.getId());
             operatorHRepo.save(oh);
 
         }
@@ -100,17 +99,36 @@ public class OperatorService {
             e.printStackTrace();
         }
         operator.setState(state);
-        Date date = new Date();
-        OperatorHistory oh = new OperatorHistory(operator.getState(), date.getTime(), operator.getId());
+        OperatorHistory oh = new OperatorHistory(operator.getState(), operator.getId());
         operatorHRepo.save(oh);
         operatorRepository.save(operator);
     }
-    /**
-     * @param oid operator id
-     * @param uid shared user id
-     * @return boolean
-     */
-    public boolean changeStatebySharedUser(Long oid, Long uid, boolean state) {
+    public void setHealthCheckDate(Long id, String token, String payload){
+        Operator operator = this.get(id);
+        if(operator.getUser().getToken().equals(token)){
+            operator.setLastHealthCheckDate(new Date());
+            operator.setStatus(DeviceStatus.GREEN);
+            if(payload.equals("1")){
+                operator.setState(true);
+            }
+            else if (payload.equals("0")) {
+                operator.setState(false);
+            }
+            operatorRepository.save(operator);
+        }
+    }
+    public void OperatorHealthCheck(Long userId){
+        List<Operator> operators = this.getAllByUser(userId,null);
+        if(!operators.isEmpty()) {
+            for (Operator operator : operators) {
+                if (new Date().getTime() - operator.getLastHealthCheckDate().getTime() > 60000) {
+                    operator.setStatus(DeviceStatus.RED);
+                    operatorRepository.save(operator);
+                }
+            }
+        }
+    }
+    public boolean changeStateBySharedUser(Long oid, Long uid, boolean state) {
         User user = userService.get(uid);
         Operator operator = this.get(oid);
 
@@ -144,19 +162,9 @@ public class OperatorService {
     }
 
     public Operator getOneByUser(Long id, Long user_id) {
-        // userService.get(user_id);
         return operatorRepository.findByIdAndUser_id(id, user_id)
                 .orElseThrow(() -> new NotFoundException("Operator Not Found or Not this user operator"));
     }
-
-    public Operator getByToken(Long id, String token) {
-        Operator op = this.get(id);
-        if (!op.getUser().getToken().equals(token)) {
-            throw new NotFoundException("Operator Not Found. Invalid token");
-        }
-        return op;
-    }
-
     public List<OperatorHistory> searchHistories(Long id, SearchRequest searchRequest) {
         this.get(id);
         if (searchRequest.getStartDate() != null) {

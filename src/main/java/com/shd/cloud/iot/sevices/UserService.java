@@ -124,7 +124,6 @@ public class UserService {
             userRepository.delete(user);
             return "successfully deleted";
         } catch (Exception e) {
-            // TODO: handle exception
             return "cannot be deleted!";
         }
     }

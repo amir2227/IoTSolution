@@ -18,4 +18,5 @@ public interface SensorHistoryRepository extends MongoRepository<SensorHistory, 
         List<SensorHistory> findAllWithStartDate(Long startDate);
         @Query("{'updated_at' : { $gte: ?0, $lte: ?1 } }")
         List<SensorHistory> findAllWithBetweenDate(Long startDate, Long endDate);
+        SensorHistory findFirstBySensorIdOrderByLastUpdateDesc(Long sensor_id);
 }

@@ -1,12 +1,16 @@
 package com.shd.cloud.iot.config.mqtt.config;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import com.shd.cloud.iot.models.SensorHistory;
 import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
+import com.shd.cloud.iot.sevices.OperatorService;
 import com.shd.cloud.iot.sevices.SensorService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,15 +23,15 @@ import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannel
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.integration.mqtt.support.MqttHeaders;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 
 @Configuration
+@RequiredArgsConstructor
+@Slf4j
 public class MqttBeans {
-    @Autowired
-    private SensorService sensorService;
+    private final SensorService sensorService;
+    private final OperatorService operatorService;
 
     @Value("${message.broker.host}")
     private String host;
@@ -91,37 +95,42 @@ public class MqttBeans {
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler() {
-        return new MessageHandler() {
-
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-                String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC).toString();
-                String payload = message.getPayload().toString();
-                if (topic.startsWith("sensor/")) {
-                    try {
-                        String t[] = topic.split("/");
-                        List<SensorHistory> sh = sensorService.searchHistory(Long.valueOf(t[1]), null);
-                        if (sh.size() > 0) {
-                            String data = sh.get(sh.size() - 1).getData();
-                            System.out.println("data   -->" + data);
-                            if (!data.equals(payload)) {
-                                SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
-                                sensorService.saveSensorHistory(Long.valueOf(t[1]), sr);
-                            }
-                        } else {
+        return message -> {
+            String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
+            String payload = message.getPayload().toString();
+            if (topic.startsWith("sensor/")) {
+                try {
+                    String[] t = topic.split("/");
+                    List<SensorHistory> sh = sensorService.searchHistory(Long.valueOf(t[1]));
+                    if (sh.size() > 0) {
+                        SensorHistory lastHistory = sh.get(sh.size() -1);
+                        String data = lastHistory.getData();
+                        log.info("data   --> {}", data);
+                        if (!data.equals(payload)) {
                             SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
                             sensorService.saveSensorHistory(Long.valueOf(t[1]), sr);
+                        }else {
+                            sensorService.changeLastUpdateHistory(lastHistory.getId());
                         }
-                    } catch (Exception e) {
-                        e.getMessage();
+                    } else {
+                        SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
+                        sensorService.saveSensorHistory(Long.valueOf(t[1]), sr);
                     }
+                } catch (Exception e) {
+                   log.error(e.getMessage());
                 }
-                System.out.println("message: " + message.getPayload());
-                System.out.println("message header: " + message.getHeaders());
-                System.out.println("message topic: " + topic);
-
             }
-
+            if (topic.startsWith("healthCheck/")){
+                try {
+                    String[] t = topic.split("/");
+                    operatorService.setHealthCheckDate(Long.valueOf(t[1]),t[2], payload);
+                }catch (Exception e){
+                    log.error(e.getMessage());
+                }
+            }
+            log.info("message: {}",message.getPayload());
+            log.info("message header: {}",message.getHeaders());
+            log.info("message topic: {}", topic);
         };
     }
 

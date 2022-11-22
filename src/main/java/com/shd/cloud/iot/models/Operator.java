@@ -1,26 +1,17 @@
 package com.shd.cloud.iot.models;
 
+import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.shd.cloud.iot.enums.DeviceStatus;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.persistence.GenerationType;
 
 @NoArgsConstructor
 @Getter
@@ -40,9 +31,15 @@ public class Operator {
     @NotNull
     private Boolean state;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 8)
+    private DeviceStatus status;
     @NotNull
     @Column(length = 20)
     private String type;
+
+    @Column
+    private Date lastHealthCheckDate;
 
     @OneToMany(mappedBy = "operator", cascade = CascadeType.REMOVE)
     private List<ScenarioOperators> scenario_Operators;
@@ -63,6 +60,7 @@ public class Operator {
         this.name = name;
         this.state = state;
         this.type = type;
+        this.lastHealthCheckDate = new Date();
     }
 
 }

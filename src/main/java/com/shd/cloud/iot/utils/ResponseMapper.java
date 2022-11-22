@@ -12,8 +12,9 @@ public class ResponseMapper {
                 .id(userDetails.getId())
                 .phone(userDetails.getPhone())
                 .username(userDetails.getUsername())
-                .token(jwt)
+                .accessToken(jwt)
                 .roles(roles)
+                .type("Bearer")
                 .build();
     }
 
