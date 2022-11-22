@@ -13,7 +13,7 @@ public class LocationResponse {
     private Long id;
     private String name;
     private String type;
-    private List<Operator> operators;
-    private List<Sensor> sensors;
+    private List<OperatorResponse> operators;
+    private List<SensorResponse> sensors;
     private Long parentId;
 }

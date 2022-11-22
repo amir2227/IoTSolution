@@ -13,12 +13,18 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.shd.cloud.iot.enums.EModality;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 //effective sensors
 @Entity
 @Table(name = "scenario_sensors")
 @JsonIgnoreProperties({"sensor", "operator", "scenario"})
+@NoArgsConstructor
+@Getter
+@Setter
 public class ScenarioSensors {
 
     @Id
@@ -33,54 +39,10 @@ public class ScenarioSensors {
     private String points;
 
     @ManyToOne
-    @JoinColumn(name = "sensor_id", nullable = true)
+    @JoinColumn(name = "sensor_id", nullable = false)
     private Sensor sensor;
 
     @ManyToOne
     @JoinColumn(name = "scenario_id")
     private Scenario scenario;
-
-    public ScenarioSensors() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public EModality getModality() {
-        return modality;
-    }
-
-    public void setModality(EModality modality) {
-        this.modality = modality;
-    }
-
-    public String getPoints() {
-        return points;
-    }
-
-    public void setPoints(String points) {
-        this.points = points;
-    }
-
-    public Sensor getSensor() {
-        return sensor;
-    }
-
-    public void setSensor(Sensor sensor) {
-        this.sensor = sensor;
-    }
-
-    public Scenario getScenario() {
-        return scenario;
-    }
-
-    public void setScenario(Scenario scenario) {
-        this.scenario = scenario;
-    }
-
 }

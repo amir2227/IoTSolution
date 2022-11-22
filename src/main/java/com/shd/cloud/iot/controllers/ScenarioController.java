@@ -5,8 +5,13 @@ import javax.validation.Valid;
 import com.shd.cloud.iot.exception.handleValidationExceptions;
 import com.shd.cloud.iot.models.Scenario;
 import com.shd.cloud.iot.payload.request.scenarioRequest.ScenarioRequest;
+import com.shd.cloud.iot.payload.response.MessageResponse;
+import com.shd.cloud.iot.payload.response.ScenarioResponse;
+import com.shd.cloud.iot.payload.response.SearchResponse;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.ScenarioService;
+import com.shd.cloud.iot.utils.ResponseMapper;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,48 +32,50 @@ import org.springframework.web.bind.annotation.RestController;
 public class ScenarioController extends handleValidationExceptions {
     private final ScenarioService scenarioService;
 
+    @ApiOperation(value = "create new scenario")
     @PostMapping("")
-    public ResponseEntity<?> createScenario(@Valid @RequestBody ScenarioRequest body) {
+    public ResponseEntity<ScenarioResponse> createScenario(@Valid @RequestBody ScenarioRequest body) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         Scenario scenario = scenarioService.create(body, userDetails.getId());
-        return ResponseEntity.ok(scenario);
+        return ResponseEntity.ok(ResponseMapper.map(scenario));
 
     }
 
+    @ApiOperation(value = "get all user scenario")
     @GetMapping("")
-    public ResponseEntity<?> getAll() {
+    public ResponseEntity<SearchResponse> getAll() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        return ResponseEntity.ok(scenarioService.getAll(userDetails.getId()));
+        return ResponseEntity.ok(ResponseMapper.map(scenarioService.getAll(userDetails.getId())));
     }
-
+    @ApiOperation(value = "edit scenario ")
     @PatchMapping("/{id}")
-    public ResponseEntity<?> add(@PathVariable("id") Long id, @RequestBody ScenarioRequest body) {
+    public ResponseEntity<ScenarioResponse> add(@PathVariable("id") Long id, @RequestBody ScenarioRequest body) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        return ResponseEntity.ok(scenarioService.add(body, id, userDetails.getId()));
+        return ResponseEntity.ok(ResponseMapper.map(scenarioService.add(body, id, userDetails.getId())));
     }
-
+    @ApiOperation(value = "get scenario by id")
     @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(scenarioService.get(id));
+    public ResponseEntity<ScenarioResponse> get(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(ResponseMapper.map(scenarioService.get(id)));
     }
-
+    @ApiOperation(value = "delete scenario by id")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+    public ResponseEntity<MessageResponse> delete(@PathVariable("id") Long id) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        return ResponseEntity.ok(scenarioService.delete(id, userDetails.getId()));
+        return ResponseEntity.ok(ResponseMapper.map(scenarioService.delete(id, userDetails.getId())));
     }
-
+    @ApiOperation(value = "delete one sensor modality from scenario")
     @DeleteMapping("/sensor/{id}")
-    public ResponseEntity<?> deleteSensorScenario(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(scenarioService.deleteScnarioSensor(id));
+    public ResponseEntity<MessageResponse> deleteSensorScenario(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(ResponseMapper.map(scenarioService.deleteScnarioSensor(id)));
     }
-
+    @ApiOperation(value = "delete one operator from scenario")
     @DeleteMapping("/operator/{id}")
-    public ResponseEntity<?> deleteOperatorScenario(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(scenarioService.deleteScnarioOperator(id));
+    public ResponseEntity<MessageResponse> deleteOperatorScenario(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(ResponseMapper.map(scenarioService.deleteScnarioOperator(id)));
     }
 }

@@ -2,14 +2,14 @@ package com.shd.cloud.iot.controllers;
 
 import java.net.URI;
 import java.util.List;
-import java.util.UUID;
 import javax.validation.Valid;
 
 import com.shd.cloud.iot.exception.handleValidationExceptions;
 import com.shd.cloud.iot.models.User;
-import com.shd.cloud.iot.payload.request.CronRequest;
 import com.shd.cloud.iot.payload.request.LoginRequest;
 import com.shd.cloud.iot.payload.request.SignupRequest;
+import com.shd.cloud.iot.payload.response.JwtResponse;
+import com.shd.cloud.iot.payload.response.UserResponse;
 import com.shd.cloud.iot.security.jwt.JwtUtils;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.UserService;
@@ -17,6 +17,7 @@ import com.shd.cloud.iot.sevices.scheduler.TaskDefinitionBean;
 import com.shd.cloud.iot.sevices.scheduler.TaskSchedulingService;
 
 import com.shd.cloud.iot.utils.ResponseMapper;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,8 +26,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,11 +39,12 @@ public class AuthController extends handleValidationExceptions {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtUtils jwtUtils;
-    private final TaskSchedulingService taskSchedulingService;
-    private final TaskDefinitionBean taskDefinitionBean;
+//    private final TaskSchedulingService taskSchedulingService;
+//    private final TaskDefinitionBean taskDefinitionBean;
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    @ApiOperation("login api")
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -56,22 +56,22 @@ public class AuthController extends handleValidationExceptions {
                 .toList();
         return ResponseEntity.ok(ResponseMapper.map(jwt,userDetails,roles));
     }
-
+    @ApiOperation("registration api")
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         User user = userService.create(signUpRequest);
         return ResponseEntity.created(URI.create("/api/auth/signup")).body(ResponseMapper.map(user));
     }
 
-    @PostMapping(path="/taskdef", consumes = "application/json", produces="application/json")
-    public void scheduleATask(@RequestBody CronRequest taskDefinition) {
-        taskDefinitionBean.setCronRequest(taskDefinition);
-        taskSchedulingService.scheduleATask(UUID.randomUUID().toString(), taskDefinitionBean, taskDefinition.getCron());
-    }
-
-    @GetMapping(path="/remove/{jobid}")
-    public void removeJob(@PathVariable String jobid) {
-        taskSchedulingService.removeScheduledTask(jobid);
-    }
+//    @PostMapping(path="/taskdef", consumes = "application/json", produces="application/json")
+//    public void scheduleATask(@RequestBody CronRequest taskDefinition) {
+//        taskDefinitionBean.setCronRequest(taskDefinition);
+//        taskSchedulingService.scheduleATask(UUID.randomUUID().toString(), taskDefinitionBean, taskDefinition.getCron());
+//    }
+//
+//    @GetMapping(path="/remove/{jobid}")
+//    public void removeJob(@PathVariable String jobid) {
+//        taskSchedulingService.removeScheduledTask(jobid);
+//    }
 
 }

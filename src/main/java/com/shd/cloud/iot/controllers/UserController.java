@@ -5,6 +5,8 @@ import javax.validation.Valid;
 import com.shd.cloud.iot.exception.handleValidationExceptions;
 import com.shd.cloud.iot.models.User;
 import com.shd.cloud.iot.payload.request.EditUserRequest;
+import com.shd.cloud.iot.payload.response.SearchResponse;
+import com.shd.cloud.iot.payload.response.UserResponse;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.UserService;
 
@@ -32,7 +34,7 @@ public class UserController extends handleValidationExceptions{
 
     @ApiOperation(value = "edit user profile")
     @PatchMapping("")
-    public ResponseEntity<?> edit(@Valid @RequestBody EditUserRequest request) {
+    public ResponseEntity<UserResponse> edit(@Valid @RequestBody EditUserRequest request) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         User user = userService.Edit(userDetails.getId(), request);
@@ -41,7 +43,7 @@ public class UserController extends handleValidationExceptions{
 
     @ApiOperation(value = "user profile")
     @GetMapping("/profile")
-    public ResponseEntity<?> get() {
+    public ResponseEntity<UserResponse> get() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         User user = userService.get(userDetails.getId());
@@ -51,7 +53,7 @@ public class UserController extends handleValidationExceptions{
     @ApiOperation(value = "get all users only 'ADMIN' role")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("")
-    public ResponseEntity<?> getAll() {
+    public ResponseEntity<SearchResponse> getAll() {
         return ResponseEntity.ok(ResponseMapper.map(userService.search()));
     }
 

@@ -41,8 +41,15 @@ public class ResponseMapper {
                 .id(sensor.getId())
                 .name(sensor.getName())
                 .type(sensor.getType())
+                .status(sensor.getStatus())
                 .location(sensor.getLocation() != null ? sensor.getLocation().getName() : null)
-                .scenarios(sensor.getScenarios())
+                .scenarios(sensor.getScenarios().stream()
+                        .map(scenarioSensors -> ScenarioSensorResponse.builder()
+                                .id(scenarioSensors.getId())
+                                .points(scenarioSensors.getPoints())
+                                .modality(scenarioSensors.getModality())
+                                .sensorId(scenarioSensors.getSensor().getId())
+                                .build()).toList())
                 .build();
     }
     public static OperatorResponse map(Operator operator){
@@ -52,7 +59,12 @@ public class ResponseMapper {
                 .type(operator.getType())
                 .state(operator.getState())
                 .location(operator.getLocation() != null ? operator.getLocation().getName() : null)
-                .scenario_Operators(operator.getScenario_Operators())
+                .scenario_Operators(operator.getScenario_Operators().stream()
+                        .map(scenarioOperators -> ScenarioOperatorResponse.builder()
+                                .id(scenarioOperators.getId())
+                                .operatorState(scenarioOperators.getOperator_state())
+                                .operatorId(scenarioOperators.getOperator().getId())
+                                .build()).toList())
                 .build();
     }
     public static LocationResponse map(Location location){
@@ -61,8 +73,21 @@ public class ResponseMapper {
                 .name(location.getName())
                 .type(location.getType())
                 .parentId(location.getParent() != null ? location.getParent().getId() : null)
-                .operators(location.getOperators())
-                .sensors(location.getSensors())
+                .operators(location.getOperators().stream()
+                        .map(operator -> OperatorResponse.builder()
+                                .state(operator.getState())
+                                .name(operator.getName())
+                                .id(operator.getId())
+                                .type(operator.getType())
+                                .status(operator.getStatus())
+                                .build()).toList())
+                .sensors(location.getSensors().stream()
+                        .map(sensor -> SensorResponse.builder()
+                                .id(sensor.getId())
+                                .name(sensor.getName())
+                                .type(sensor.getType())
+                                .status(sensor.getStatus())
+                                .build()).toList())
                 .build();
     }
     public static UserResponse map(User user){
@@ -73,6 +98,26 @@ public class ResponseMapper {
                 .phone(user.getPhone())
                 .token(user.getToken())
                 .roles(user.getRoles())
+                .build();
+    }
+    public static ScenarioResponse map(Scenario scenario){
+        return ScenarioResponse.builder()
+                .id(scenario.getId())
+                .description(scenario.getDescription())
+                .isActive(scenario.getIsActive())
+                .effectiveSensors(scenario.getEffective_sensors().stream()
+                        .map(scenarioSensor -> ScenarioSensorResponse.builder()
+                                .id(scenarioSensor.getId())
+                                .modality(scenarioSensor.getModality())
+                                .points(scenarioSensor.getPoints())
+                                .sensorId(scenarioSensor.getSensor().getId())
+                                .build()).toList())
+                .targetOperators(scenario.getTarget_operators().stream()
+                        .map(scenarioOperator -> ScenarioOperatorResponse.builder()
+                                .id(scenarioOperator.getId())
+                                .operatorState(scenarioOperator.getOperator_state())
+                                .operatorId(scenarioOperator.getOperator().getId())
+                                .build()).toList())
                 .build();
     }
 }
