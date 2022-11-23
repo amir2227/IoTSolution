@@ -37,7 +37,7 @@ public class ResponseMapper {
                 .type(sensor.getType())
                 .status(sensor.getStatus())
                 .location(sensor.getLocation() != null ? sensor.getLocation().getName() : null)
-                .scenarios(sensor.getScenarios().isEmpty() ? null
+                .scenarios(sensor.getScenarios() == null ? null
                         : sensor.getScenarios().stream()
                         .map(scenarioSensors -> ScenarioSensorResponse.builder()
                                 .id(scenarioSensors.getId())
@@ -55,7 +55,7 @@ public class ResponseMapper {
                 .type(operator.getType())
                 .state(operator.getState())
                 .location(operator.getLocation() != null ? operator.getLocation().getName() : null)
-                .scenarios(operator.getScenario_Operators().isEmpty() ? null
+                .scenarios(operator.getScenario_Operators() == null ? null
                         : operator.getScenario_Operators().stream()
                         .map(scenarioOperators -> ScenarioOperatorResponse.builder()
                                 .id(scenarioOperators.getId())
@@ -71,7 +71,7 @@ public class ResponseMapper {
                 .name(location.getName())
                 .type(location.getType())
                 .parentId(location.getParent() != null ? location.getParent().getId() : null)
-                .operators(location.getOperators().isEmpty() ? null
+                .operators(location.getOperators() == null ? null
                         : location.getOperators().stream()
                         .map(operator -> OperatorResponse.builder()
                                 .state(operator.getState())
@@ -80,7 +80,7 @@ public class ResponseMapper {
                                 .type(operator.getType())
                                 .status(operator.getStatus())
                                 .build()).toList())
-                .sensors(location.getSensors().isEmpty() ? null
+                .sensors(location.getSensors() == null ? null
                         : location.getSensors().stream()
                         .map(sensor -> SensorResponse.builder()
                                 .id(sensor.getId())

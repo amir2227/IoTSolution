@@ -44,7 +44,7 @@ public class SensorController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         List<Sensor> sensors = sensorService.getAllByUser(userDetails.getId(), key);
-        return ResponseEntity.ok(ResponseMapper.map(sensors));
+        return ResponseEntity.ok(ResponseMapper.map(sensors.stream().map(ResponseMapper::map).toList()));
 
     }
     @ApiOperation(value = "edit sensor")

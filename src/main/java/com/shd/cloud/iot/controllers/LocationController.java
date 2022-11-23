@@ -51,8 +51,7 @@ public class LocationController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         List<Location> locations = locationService.search(userDetails.getId(), key);
-        return ResponseEntity.ok(ResponseMapper.map(locations));
-
+        return ResponseEntity.ok(ResponseMapper.map(locations.stream().map(ResponseMapper::map).toList()));
     }
     @ApiOperation(value = "get one location by id")
     @GetMapping("/{id}")

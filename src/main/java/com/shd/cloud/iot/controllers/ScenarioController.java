@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/scenario")
@@ -47,7 +49,8 @@ public class ScenarioController extends handleValidationExceptions {
     public ResponseEntity<SearchResponse> getAll() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        return ResponseEntity.ok(ResponseMapper.map(scenarioService.getAll(userDetails.getId())));
+        List<Scenario> scenarios = scenarioService.getAll(userDetails.getId());
+        return ResponseEntity.ok(ResponseMapper.map(scenarios.stream().map(ResponseMapper::map).toList()));
     }
     @ApiOperation(value = "edit scenario ")
     @PatchMapping("/{id}")

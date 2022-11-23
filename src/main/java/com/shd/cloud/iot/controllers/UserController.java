@@ -54,7 +54,7 @@ public class UserController extends handleValidationExceptions{
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("")
     public ResponseEntity<SearchResponse> getAll() {
-        return ResponseEntity.ok(ResponseMapper.map(userService.search()));
+        return ResponseEntity.ok(ResponseMapper.map(userService.search().stream().map(ResponseMapper::map).toList()));
     }
 
 }

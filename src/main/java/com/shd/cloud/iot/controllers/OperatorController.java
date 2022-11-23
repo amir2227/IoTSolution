@@ -43,7 +43,7 @@ public class OperatorController extends handleValidationExceptions {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         List<Operator> operators = operatorService.getAllByUser(userDetails.getId(), key);
-        return ResponseEntity.ok(ResponseMapper.map(operators));
+        return ResponseEntity.ok(ResponseMapper.map(operators.stream().map(ResponseMapper::map).toList()));
     }
     @ApiOperation(value = "get one operator by id")
     @GetMapping("/{id}")
