@@ -18,12 +18,6 @@ public class ResponseMapper {
                 .build();
     }
 
-    public static UserDeviceResponse map(List<Sensor> sensors, List<Operator> operators){
-        return UserDeviceResponse.builder()
-                .sensors(sensors)
-                .operators(operators)
-                .build();
-    }
     public static SearchResponse map(List<?> data){
         return SearchResponse.builder()
                 .status(200)
@@ -43,12 +37,14 @@ public class ResponseMapper {
                 .type(sensor.getType())
                 .status(sensor.getStatus())
                 .location(sensor.getLocation() != null ? sensor.getLocation().getName() : null)
-                .scenarios(sensor.getScenarios().stream()
+                .scenarios(sensor.getScenarios().isEmpty() ? null
+                        : sensor.getScenarios().stream()
                         .map(scenarioSensors -> ScenarioSensorResponse.builder()
                                 .id(scenarioSensors.getId())
                                 .points(scenarioSensors.getPoints())
                                 .modality(scenarioSensors.getModality())
                                 .sensorId(scenarioSensors.getSensor().getId())
+                                .scenarioId(scenarioSensors.getScenario().getId())
                                 .build()).toList())
                 .build();
     }
@@ -59,11 +55,13 @@ public class ResponseMapper {
                 .type(operator.getType())
                 .state(operator.getState())
                 .location(operator.getLocation() != null ? operator.getLocation().getName() : null)
-                .scenario_Operators(operator.getScenario_Operators().stream()
+                .scenarios(operator.getScenario_Operators().isEmpty() ? null
+                        : operator.getScenario_Operators().stream()
                         .map(scenarioOperators -> ScenarioOperatorResponse.builder()
                                 .id(scenarioOperators.getId())
                                 .operatorState(scenarioOperators.getOperator_state())
                                 .operatorId(scenarioOperators.getOperator().getId())
+                                .scenarioId(scenarioOperators.getScenario().getId())
                                 .build()).toList())
                 .build();
     }
@@ -73,7 +71,8 @@ public class ResponseMapper {
                 .name(location.getName())
                 .type(location.getType())
                 .parentId(location.getParent() != null ? location.getParent().getId() : null)
-                .operators(location.getOperators().stream()
+                .operators(location.getOperators().isEmpty() ? null
+                        : location.getOperators().stream()
                         .map(operator -> OperatorResponse.builder()
                                 .state(operator.getState())
                                 .name(operator.getName())
@@ -81,7 +80,8 @@ public class ResponseMapper {
                                 .type(operator.getType())
                                 .status(operator.getStatus())
                                 .build()).toList())
-                .sensors(location.getSensors().stream()
+                .sensors(location.getSensors().isEmpty() ? null
+                        : location.getSensors().stream()
                         .map(sensor -> SensorResponse.builder()
                                 .id(sensor.getId())
                                 .name(sensor.getName())

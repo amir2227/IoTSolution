@@ -15,18 +15,14 @@ public class EditUserRequest {
     @NotBlank
     @Size(min = 3, max = 20)
     private String username;
-
     @NotBlank
     private String fullname;
-
     @NotBlank
     @Size(min = 11, max = 11)
     private String phone;
-
     @NotBlank
     @Size(min = 6, max = 40)
     private String password;
-
     @NotBlank
     @Size(min = 6, max = 40)
     private String confirm_password;

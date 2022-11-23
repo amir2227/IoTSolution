@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @AllArgsConstructor
@@ -12,7 +13,9 @@ import java.util.List;
 @Getter
 @Setter
 public class ScenarioRequest {
+    @Size(max = 255)
     private String description;
+    private Boolean isActive;
     private List<ScenarioSensorRequest> scenarioSensors;
     private List<ScenarioOperatorRequest> scenarioOperators;
 }

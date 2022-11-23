@@ -48,6 +48,7 @@ public class ScenarioService {
         Scenario sc = new Scenario();
         sc.setDescription(scenario.getDescription());
         sc.setUser(user);
+        sc.setIsActive(scenario.getIsActive());
         sc = scenarioRepo.save(sc);
         List<ScenarioSensors> scenarioSensors = new ArrayList<>();
         List<ScenarioOperators> scenarioOperators = new ArrayList<>();
@@ -102,6 +103,9 @@ public class ScenarioService {
         Scenario scenario = this.get(scenario_id);
         if (scenarioRequest == null) {
             throw new BadRequestException("there is no scenario");
+        }
+        if (scenarioRequest.getIsActive() != null){
+            scenario.setIsActive(scenarioRequest.getIsActive());
         }
         if (!Objects.equals(scenario.getUser().getId(), user_id))
             throw new BadRequestException("access denied");
@@ -172,7 +176,6 @@ public class ScenarioService {
     public List<Scenario> getAll(Long user_id) {
         return scenarioRepo.findByUser_id(user_id);
     }
-
 
     public Scenario get(Long id) {
         return scenarioRepo.findById(id)

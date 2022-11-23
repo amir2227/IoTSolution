@@ -16,12 +16,9 @@ public class EditOperator {
 
     @Size(min = 3, max = 20)
     private String name;
-
     private Boolean state;
-
     @Size(max = 20)
     private String type;
-
     @Min(1)
     private Long location_id;
 }

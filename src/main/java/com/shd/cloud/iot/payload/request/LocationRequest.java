@@ -14,10 +14,8 @@ public class LocationRequest {
     @NotBlank
     @Size(min = 3, max = 20)
     private String name;
-
     @NotBlank
     @Size(min = 3, max = 20)
     private String type;
-
     private Long parent_id;
 }
