@@ -70,7 +70,7 @@ public class ResponseMapper {
                 .id(location.getId())
                 .name(location.getName())
                 .type(location.getType())
-                .parentId(location.getParent() != null ? location.getParent().getId() : null)
+                .geometric(location.getGeometric())
                 .operators(location.getOperators() == null ? null
                         : location.getOperators().stream()
                         .map(operator -> OperatorResponse.builder()

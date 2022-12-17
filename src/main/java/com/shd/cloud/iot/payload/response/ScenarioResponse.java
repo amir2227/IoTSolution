@@ -2,8 +2,6 @@ package com.shd.cloud.iot.payload.response;
 
 import java.util.List;
 
-import com.shd.cloud.iot.models.Scenario;
-import com.shd.cloud.iot.models.ScenarioSensors;
 import lombok.Builder;
 import lombok.Data;
 

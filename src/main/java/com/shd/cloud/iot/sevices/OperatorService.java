@@ -169,11 +169,12 @@ public class OperatorService {
         this.get(id);
         if (searchRequest.getStartDate() != null) {
             if (searchRequest.getEndDate() != null) {
-                return operatorHRepo.findAllWithBetweenDate(searchRequest.getStartDate(), searchRequest.getEndDate());
+                return operatorHRepo.findAllWithBetweenDate(new Date(searchRequest.getStartDate()),
+                        new Date(searchRequest.getEndDate()));
             }
-            return operatorHRepo.findAllWithStartDate(searchRequest.getStartDate());
+            return operatorHRepo.findAllWithStartDate(new Date(searchRequest.getStartDate()));
         } else if (searchRequest.getEndDate() != null) {
-            return operatorHRepo.findAllWithEndDate(searchRequest.getEndDate());
+            return operatorHRepo.findAllWithEndDate(new Date(searchRequest.getEndDate()));
         } else {
             return operatorHRepo.findByOperator_id(id);
         }

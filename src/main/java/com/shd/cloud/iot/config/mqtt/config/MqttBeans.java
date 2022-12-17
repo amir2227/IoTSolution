@@ -1,15 +1,9 @@
 package com.shd.cloud.iot.config.mqtt.config;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 
-import com.shd.cloud.iot.models.SensorHistory;
-import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
-import com.shd.cloud.iot.sevices.OperatorService;
-import com.shd.cloud.iot.sevices.SensorService;
+import com.shd.cloud.iot.sevices.MqttService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,10 +22,8 @@ import org.springframework.messaging.MessageHandler;
 
 @Configuration
 @RequiredArgsConstructor
-@Slf4j
 public class MqttBeans {
-    private final SensorService sensorService;
-    private final OperatorService operatorService;
+    private final MqttService mqttService;
 
     @Value("${message.broker.host}")
     private String host;
@@ -49,7 +41,6 @@ public class MqttBeans {
         // String pass = "12345678";
         // options.setPassword(pass.toCharArray());
         options.setCleanSession(true);
-
         factory.setConnectionOptions(options);
 
         return factory;
@@ -98,39 +89,7 @@ public class MqttBeans {
         return message -> {
             String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
             String payload = message.getPayload().toString();
-            if (topic.startsWith("sensor/")) {
-                try {
-                    String[] t = topic.split("/");
-                    List<SensorHistory> sh = sensorService.searchHistory(Long.valueOf(t[1]));
-                    if (sh.size() > 0) {
-                        SensorHistory lastHistory = sh.get(sh.size() -1);
-                        String data = lastHistory.getData();
-                        log.info("data   --> {}", data);
-                        if (!data.equals(payload)) {
-                            SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
-                            sensorService.saveSensorHistory(Long.valueOf(t[1]), sr);
-                        }else {
-                            sensorService.changeLastUpdateHistory(lastHistory.getId());
-                        }
-                    } else {
-                        SensorHistoryRequest sr = new SensorHistoryRequest(payload, t[2]);
-                        sensorService.saveSensorHistory(Long.valueOf(t[1]), sr);
-                    }
-                } catch (Exception e) {
-                   log.error(e.getMessage());
-                }
-            }
-            if (topic.startsWith("healthCheck/")){
-                try {
-                    String[] t = topic.split("/");
-                    operatorService.setHealthCheckDate(Long.valueOf(t[1]),t[2], payload);
-                }catch (Exception e){
-                    log.error(e.getMessage());
-                }
-            }
-            log.info("message: {}",message.getPayload());
-            log.info("message header: {}",message.getHeaders());
-            log.info("message topic: {}", topic);
+            mqttService.handleMessage(topic,payload);
         };
     }
 

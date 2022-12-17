@@ -13,10 +13,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import lombok.*;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
 @NoArgsConstructor
 @Setter
@@ -24,6 +25,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "locations")
 @JsonIgnoreProperties({"user", "parent"})
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +34,9 @@ public class Location {
     private String name;
     @Column(length = 20)
     private String type;
-
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private JsonNode geometric;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -42,11 +46,7 @@ public class Location {
 
     @OneToMany(mappedBy = "location")
     private List<Sensor> sensors;
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
-    private Location parent;
-    @OneToMany(mappedBy = "parent")
-    private List<Location> children;
+
 
     public Location(String name, String type, User user) {
         this.name = name;
@@ -55,3 +55,4 @@ public class Location {
     }
 
 }
+

@@ -1,5 +1,6 @@
 package com.shd.cloud.iot.payload.request;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,5 +18,6 @@ public class LocationRequest {
     @NotBlank
     @Size(min = 3, max = 20)
     private String type;
-    private Long parent_id;
+
+    private JsonNode geometric;
 }

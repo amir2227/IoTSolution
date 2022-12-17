@@ -104,25 +104,28 @@ public class SensorService {
     public List<SensorHistory> searchHistory(Long id, SearchRequest sRequest) {
             if (sRequest.getStartDate() != null) {
                 if (sRequest.getEndDate() != null) {
-                    return sensorHistoryRepository.findAllWithBetweenDate(sRequest.getStartDate(),
-                            sRequest.getEndDate());
+                    return sensorHistoryRepository.findAllWithBetweenDate(new Date(sRequest.getStartDate()),
+                            new Date(sRequest.getEndDate()));
                 }
-                return sensorHistoryRepository.findAllWithStartDate(sRequest.getStartDate());
+                return sensorHistoryRepository.findAllWithStartDate(new Date(sRequest.getStartDate()));
             } else if (sRequest.getEndDate() != null) {
-                return sensorHistoryRepository.findAllWithEndDate(sRequest.getEndDate());
+                return sensorHistoryRepository.findAllWithEndDate(new Date(sRequest.getEndDate()));
             } else {
-                return sensorHistoryRepository.findBySensor_id(id);
+                return sensorHistoryRepository.findBySensorId(id);
             }
     }
     public List<SensorHistory> searchHistory(Long id){
-        return sensorHistoryRepository.findBySensor_id(id);
+        log.info("in search all history sensor");
+        return sensorHistoryRepository.findBySensorId(id);
     }
+
 
     public SensorHistory saveSensorHistory(Long sid, SensorHistoryRequest shr) {
         Sensor sensor = this.get(sid);
         if (!sensor.getUser().getToken().equals(shr.getToken())) {
             throw new BadRequestException("not valid request");
         }
+        log.info("in save history");
         List<ScenarioSensors> scenarioSensors = scenarioSensorsRepository.findBySensor_id(sensor.getId());
         if (scenarioSensors != null && scenarioSensors.size() > 0) {
             for (ScenarioSensors s_sensor : scenarioSensors) {
@@ -134,6 +137,7 @@ public class SensorService {
         }
         SensorHistory sensorHistory = new SensorHistory(shr.getData(), sensor.getId());
         sensor.setStatus(DeviceStatus.YELLOW);
+        sensorRepository.save(sensor);
         return sensorHistoryRepository.save(sensorHistory);
     }
     // health check of sensor list
@@ -150,7 +154,7 @@ public class SensorService {
         }
     }
     public void changeLastUpdateHistory(String id){
-        SensorHistory sensorHistory = sensorHistoryRepository.findById(id).orElseThrow(()-> new RuntimeException("sensor with id "+ id + "not found"));
+        SensorHistory sensorHistory = sensorHistoryRepository.findById(id).orElseThrow(()-> new RuntimeException("sensor with id "+ id + " not found"));
         Date now = new Date();
         // if next sensor data is less than 31 second sensor status change to green
         if(now.getTime() - sensorHistory.getLastUpdate().getTime() < 31000){
@@ -207,7 +211,7 @@ public class SensorService {
             for (ScenarioSensors scenarioSensor : scenarioSensors) {
                 if (Objects.equals(scenarioSensor.getId(), s_sensor.getId()))
                     continue;
-                List<SensorHistory> sensorHistories = sensorHistoryRepository.findBySensor_id(scenarioSensor.getSensor().getId());
+                List<SensorHistory> sensorHistories = sensorHistoryRepository.findBySensorId(scenarioSensor.getSensor().getId());
                 int hsize = sensorHistories.size();
                 String data = sensorHistories.get(hsize - 1).getData();
                 if (!checkModality(data, scenarioSensor)) {

@@ -21,10 +21,7 @@ public class LocationService {
     public Location create(LocationRequest dto, Long user_id) {
         User user = userService.get(user_id);
         Location location = new Location(dto.getName(), dto.getType(), user);
-        if (dto.getParent_id() != null) {
-            Location parent = this.get(dto.getParent_id());
-            location.setParent(parent);
-        }
+        location.setGeometric(dto.getGeometric());
         return locationRepository.save(location);
     }
 
@@ -53,6 +50,9 @@ public class LocationService {
         }
         if (request.getType() != null) {
             location.setType(location.getType());
+        }
+        if(request.getGeometric() != null){
+            location.setGeometric(request.getGeometric());
         }
         return locationRepository.save(location);
     }
