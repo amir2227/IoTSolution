@@ -13,8 +13,6 @@ import com.shd.cloud.iot.payload.response.UserResponse;
 import com.shd.cloud.iot.security.jwt.JwtUtils;
 import com.shd.cloud.iot.security.service.UserDetailsImpl;
 import com.shd.cloud.iot.sevices.UserService;
-import com.shd.cloud.iot.sevices.scheduler.TaskDefinitionBean;
-import com.shd.cloud.iot.sevices.scheduler.TaskSchedulingService;
 
 import com.shd.cloud.iot.utils.ResponseMapper;
 import io.swagger.annotations.ApiOperation;
@@ -39,8 +37,6 @@ public class AuthController extends handleValidationExceptions {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtUtils jwtUtils;
-//    private final TaskSchedulingService taskSchedulingService;
-//    private final TaskDefinitionBean taskDefinitionBean;
 
     @ApiOperation("login api")
     @PostMapping("/login")

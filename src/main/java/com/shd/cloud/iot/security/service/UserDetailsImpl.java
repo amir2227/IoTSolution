@@ -1,5 +1,6 @@
 package com.shd.cloud.iot.security.service;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -13,13 +14,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class UserDetailsImpl implements UserDetails {
+    @Serial
     private static final long serialVersionUID = 1L;
-    private Long id;
-    private String username;
-    private String phone;
+    private final Long id;
+    private final String username;
+    private final String phone;
     @JsonIgnore
-    private String password;
-    private Collection<? extends GrantedAuthority> authorities;
+    private final String password;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(Long id, String username, String phone, String password,
             Collection<? extends GrantedAuthority> authorities) {
@@ -36,7 +38,7 @@ public class UserDetailsImpl implements UserDetails {
                 .collect(Collectors.toList());
         return new UserDetailsImpl(
                 user.getId(),
-                user.getUsername(),
+                user.getEmail(),
                 user.getPhone(),
                 user.getPassword(),
                 authorities);

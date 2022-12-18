@@ -34,17 +34,17 @@ public class UserService {
     
 
     public User create(SignupRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            throw new DuplicatException("Username");
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            throw new DuplicatException("Duplicate email");
         }
         if (userRepository.existsByPhone(signUpRequest.getPhone())) {
-            throw new DuplicatException("Phone");
+            throw new DuplicatException("Duplicate phone");
         }
         // Create new user's account
 
-        User user = new User(signUpRequest.getUsername(),
-                signUpRequest.getPhone(),
+        User user = new User(signUpRequest.getEmail(),
                 signUpRequest.getFullname(),
+                signUpRequest.getPhone(),
                 encoder.encode(signUpRequest.getPassword()));
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
@@ -78,9 +78,9 @@ public class UserService {
     }
 
 
-    public User getByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("User Not Found with username" + username));
+    public User getByEmail(String email) throws UsernameNotFoundException {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User Not Found with email" + email));
     }
 
     public List<User> search() {
@@ -106,12 +106,12 @@ public class UserService {
 
             user.setPhone(request.getPhone());
         }
-        if (request.getUsername() != null) {
-            Optional<User> us = userRepository.findByUsername(request.getUsername());
-            if (us.isPresent() && !us.get().getUsername().equals(request.getUsername()))
+        if (request.getEmail() != null) {
+            Optional<User> us = userRepository.findByEmail(request.getEmail());
+            if (us.isPresent() && !us.get().getEmail().equals(request.getEmail()))
                 throw new DuplicatException("username already exist");
             else
-                user.setUsername(request.getUsername());
+                user.setEmail(request.getEmail());
         }
         return userRepository.save(user);
     }

@@ -1,6 +1,5 @@
 package com.shd.cloud.iot.controllers;
 
-
 import com.shd.cloud.iot.config.mqtt.config.MqttGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

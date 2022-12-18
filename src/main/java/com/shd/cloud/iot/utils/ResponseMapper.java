@@ -93,7 +93,7 @@ public class ResponseMapper {
     public static UserResponse map(User user){
         return UserResponse.builder()
                 .id(user.getId())
-                .username(user.getUsername())
+                .email(user.getEmail())
                 .fullname(user.getFullname())
                 .phone(user.getPhone())
                 .token(user.getToken())
