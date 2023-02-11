@@ -9,10 +9,14 @@ import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
 import com.shd.cloud.iot.enums.ERole;
+import com.shd.cloud.iot.models.MqttAcl;
+import com.shd.cloud.iot.models.MqttUser;
 import com.shd.cloud.iot.models.Role;
 import com.shd.cloud.iot.models.User;
 import com.shd.cloud.iot.payload.request.EditUserRequest;
 import com.shd.cloud.iot.payload.request.SignupRequest;
+import com.shd.cloud.iot.repositorys.MqttAclRepository;
+import com.shd.cloud.iot.repositorys.MqttUserRepository;
 import com.shd.cloud.iot.repositorys.RoleRepository;
 import com.shd.cloud.iot.repositorys.UserRepository;
 
@@ -28,6 +32,8 @@ import net.bytebuddy.utility.RandomString;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final MqttUserRepository mqttUserRepository;
+    private final MqttAclRepository mqttAclRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
 
@@ -41,7 +47,6 @@ public class UserService {
             throw new DuplicatException("Duplicate phone");
         }
         // Create new user's account
-
         User user = new User(signUpRequest.getEmail(),
                 signUpRequest.getFullname(),
                 signUpRequest.getPhone(),
@@ -67,7 +72,10 @@ public class UserService {
         }
         user.setToken(tokenGenerator());
         user.setRoles(roles);
-
+        MqttUser mqttUser = new MqttUser(user.getEmail(), encoder.encode(user.getToken()), null,false);
+        MqttAcl mqttAcl = new MqttAcl(1,null, user.getEmail(), user.getToken(), 3,"device/%c/#");
+        mqttUserRepository.save(mqttUser);
+        mqttAclRepository.save(mqttAcl);
         return userRepository.save(user);
     }
 
@@ -80,7 +88,7 @@ public class UserService {
 
     public User getByEmail(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User Not Found with email" + email));
+                .orElseThrow(() -> new BadRequestException("User Not Found with email" + email));
     }
 
     public List<User> search() {
@@ -108,10 +116,18 @@ public class UserService {
         }
         if (request.getEmail() != null) {
             Optional<User> us = userRepository.findByEmail(request.getEmail());
-            if (us.isPresent() && !us.get().getEmail().equals(request.getEmail()))
+            if (us.isPresent() && !us.get().getEmail().equals(request.getEmail())) {
                 throw new DuplicatException("username already exist");
-            else
-                user.setEmail(request.getEmail());
+            }
+            MqttUser mqttUser = mqttUserRepository.findByUsername(user.getEmail()).get();
+            List<MqttAcl> mqttAcls = mqttAclRepository.findByUsername(user.getEmail());
+            mqttUser.setUsername(request.getEmail());
+            for (MqttAcl mqttAcl: mqttAcls){
+                mqttAcl.setUsername(mqttUser.getUsername());
+                mqttAclRepository.save(mqttAcl);
+            }
+            mqttUserRepository.save(mqttUser);
+            user.setEmail(request.getEmail());
         }
         return userRepository.save(user);
     }

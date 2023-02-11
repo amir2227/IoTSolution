@@ -34,25 +34,22 @@ public class ScenarioService {
     private final SensorService sensorService;
     private final UserService userService;
 
-    public Scenario create(ScenarioRequest scenario, Long user_id) {
+    public Scenario create(ScenarioRequest request, Long user_id) {
 
-        if (scenario == null) {
+        if (request == null) {
             throw new BadRequestException("there is no scenario");
         }
-        if (scenario.getScenarioSensors() == null || scenario.getScenarioSensors().size() < 1)
+        if (request.getScenarioSensors() == null || request.getScenarioSensors().size() < 1)
             throw new BadRequestException("there is no scenarioSensor");
-        if (scenario.getScenarioOperators() == null || scenario.getScenarioOperators().size() < 1)
+        if (request.getScenarioOperators() == null || request.getScenarioOperators().size() < 1)
             throw new BadRequestException("there is no scenarioOperator");
 
         User user = userService.get(user_id);
-        Scenario sc = new Scenario();
-        sc.setDescription(scenario.getDescription());
-        sc.setUser(user);
-        sc.setIsActive(scenario.getIsActive());
-        sc = scenarioRepo.save(sc);
+        Scenario scenario = new Scenario(request.getDescription(),request.getIsActive(),user);
+        scenario = scenarioRepo.save(scenario);
         List<ScenarioSensors> scenarioSensors = new ArrayList<>();
         List<ScenarioOperators> scenarioOperators = new ArrayList<>();
-        for (ScenarioSensorRequest s_sensor : scenario.getScenarioSensors()) {
+        for (ScenarioSensorRequest s_sensor : request.getScenarioSensors()) {
 
             ScenarioSensors scenarioSensor = new ScenarioSensors();
             if (s_sensor.getSensor_id() == null) {
@@ -78,24 +75,24 @@ public class ScenarioService {
             }
             scenarioSensor.setSensor(sensorModel);
             scenarioSensor.setModality(s_sensor.getModality());
-            scenarioSensor.setScenario(sc);
+            scenarioSensor.setScenario(scenario);
             scenarioSensors.add(scenarioSensorsRepo.save(scenarioSensor));
 
         }
-        sc.setEffective_sensors(scenarioSensors);
-        for (ScenarioOperatorRequest s_operator : scenario.getScenarioOperators()) {
+        scenario.setEffectiveSensors(scenarioSensors);
+        for (ScenarioOperatorRequest s_operator : request.getScenarioOperators()) {
             if (s_operator.getOperator_id() == null) {
                 throw new BadRequestException("Operator id is null");
             }
             Operator operatorModel = operatorService.get(s_operator.getOperator_id());
             ScenarioOperators scenarioOperator = new ScenarioOperators(operatorModel,
                     s_operator.getOperator_state());
-            scenarioOperator.setScenario(sc);
+            scenarioOperator.setScenario(scenario);
             scenarioOperators.add(scenarioOperatorsRepo.save(scenarioOperator));
         }
-        sc.setTarget_operators(scenarioOperators);
+        scenario.setTargetOperators(scenarioOperators);
 
-        return scenarioRepo.save(sc);
+        return scenarioRepo.save(scenario);
 
     }
 
@@ -120,7 +117,7 @@ public class ScenarioService {
                     throw new BadRequestException("Sensor id is null");
                 }
                 Sensor sensorModel = sensorService.get(s_sensor.getSensor_id());
-                scenario.getEffective_sensors().forEach(s -> {
+                scenario.getEffectiveSensors().forEach(s -> {
                     if (s.getSensor().equals(sensorModel)) {
                         if (s.getModality().equals(s_sensor.getModality())) {
                             throw new DuplicatException("duplicated sensor scenario with id " + s.getId());
@@ -150,7 +147,7 @@ public class ScenarioService {
                 scenarioSensors.add(scenarioSensorsRepo.save(scenarioSensor));
 
             }
-            scenario.getEffective_sensors().addAll(scenarioSensors);
+            scenario.getEffectiveSensors().addAll(scenarioSensors);
         }
         if (scenarioRequest.getScenarioOperators() != null) {
             List<ScenarioOperators> scenarioOperators = new ArrayList<>();
@@ -159,7 +156,7 @@ public class ScenarioService {
                     throw new BadRequestException("Operator id is null");
                 }
                 Operator operatorModel = operatorService.get(s_operator.getOperator_id());
-                scenario.getTarget_operators().forEach(o -> {
+                scenario.getTargetOperators().forEach(o -> {
                     if (o.getOperator().equals(operatorModel))
                         throw new DuplicatException("duplicated scenario operator with id " + o.getId());
                 });
@@ -168,7 +165,7 @@ public class ScenarioService {
                 scenarioOperator.setScenario(scenario);
                 scenarioOperators.add(scenarioOperatorsRepo.save(scenarioOperator));
             }
-            scenario.getTarget_operators().addAll(scenarioOperators);
+            scenario.getTargetOperators().addAll(scenarioOperators);
         }
         return scenarioRepo.save(scenario);
     }

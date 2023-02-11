@@ -1,6 +1,8 @@
 package com.shd.cloud.iot.models;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -12,6 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 @NoArgsConstructor
 @Setter
@@ -27,6 +30,9 @@ public class Sensor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Type(type = "uuid-char")
+    @GeneratedValue
+    private UUID deviceId;
     @NotNull
     @Column(length = 80)
     private String name;
@@ -36,6 +42,10 @@ public class Sensor {
     @Enumerated(EnumType.STRING)
     @Column(length = 8)
     private DeviceStatus status;
+    @Column(columnDefinition = "timestamp")
+    private LocalDateTime createdAt;
+    @Column(columnDefinition = "timestamp")
+    private LocalDateTime lastHealthCheckDate;
     @ManyToOne
     @JoinColumn(name = "location_id")
     private Location location;
@@ -51,6 +61,7 @@ public class Sensor {
     public Sensor(@NotNull String name, @NotNull String type) {
         this.name = name;
         this.type = type;
+        this.createdAt = LocalDateTime.now();
     }
 
 

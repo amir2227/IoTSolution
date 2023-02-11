@@ -75,12 +75,4 @@ public class OperatorController extends handleValidationExceptions {
         List<OperatorHistory> sh = operatorService.searchHistories(id, sRequest);
         return ResponseEntity.ok(ResponseMapper.map(sh));
     }
-    @ApiOperation(value = "operator health check request")
-    @GetMapping("/check")
-    public ResponseEntity<MessageResponse> healthCheck(){
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-        operatorService.OperatorHealthCheck(userDetails.getId());
-        return ResponseEntity.ok(ResponseMapper.map("checked"));
-    }
 }

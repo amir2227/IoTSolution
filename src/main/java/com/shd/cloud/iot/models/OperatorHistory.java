@@ -22,12 +22,15 @@ public class OperatorHistory {
     @Id
     private String id;
     private Boolean state;
-    private Date updatedAt;
-    private Long operatorId;
+    private LocalDateTime updatedAt;
 
-    public OperatorHistory(Boolean state, Long operator_id) {
+    private User operatedUser;
+    private Operator operator;
+
+    public OperatorHistory(Boolean state, Operator operator, User operatedUser) {
         this.state = state;
-        this.updatedAt = new Date();
-        this.operatorId = operator_id;
+        this.updatedAt = LocalDateTime.now();
+        this.operator = operator;
+        this.operatedUser = operatedUser;
     }
 }

@@ -1,7 +1,10 @@
 package com.shd.cloud.iot.sevices;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -20,6 +23,7 @@ import com.shd.cloud.iot.payload.request.SearchRequest;
 import com.shd.cloud.iot.repositorys.OperatorHistoryRepository;
 import com.shd.cloud.iot.repositorys.OperatorRepository;
 
+import com.shd.cloud.iot.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +34,6 @@ public class OperatorService {
     private final OperatorHistoryRepository operatorHRepo;
     private final LocationService locationService;
     private final UserService userService;
-
     @Resource
     private MqttGateway mqttGateway;
 
@@ -48,27 +51,25 @@ public class OperatorService {
         operator.setUser(user);
         operator.setStatus(DeviceStatus.RED);
         operator = operatorRepository.save(operator);
-        OperatorHistory oh = new OperatorHistory(operator.getState(), operator.getId());
+        OperatorHistory oh = new OperatorHistory(operator.getState(), operator,user);
         operatorHRepo.save(oh);
         return operator;
     }
     public Operator Edit(EditOperator dto, Long id, Long user_id) {
         Operator operator = this.getOneByUser(id, user_id);
         if (dto.getState() != null) {
-            String topic = "operator/" + operator.getId() + "/" + operator.getUser().getToken();
+            String topic = "device/" + operator.getUser().getToken() + "/" + operator.getDeviceId() +"/operator";
             try {
-                if (dto.getState())
+                if (dto.getState()) {
                     mqttGateway.sendToMqtt(topic, 1, "1");
-                else
+                }
+                else {
                     mqttGateway.sendToMqtt(topic, 1, "0");
+                }
             } catch (Exception e) {
                 System.out.println("mqtt exception: " + e.getMessage());
                 e.printStackTrace();
             }
-            operator.setState(dto.getState());
-            OperatorHistory oh = new OperatorHistory(operator.getState(), operator.getId());
-            operatorHRepo.save(oh);
-
         }
 
         if (dto.getName() != null) {
@@ -85,29 +86,42 @@ public class OperatorService {
 
         return operatorRepository.save(operator);
     }
-
-    public void changeState(Long operator_id, boolean state){
-        Operator operator = this.get(operator_id);
-        String topic = "operator/" + operator.getId() + "/" + operator.getUser().getToken();
+    public void changeStateByMqtt(UUID deviceId, boolean state){
+        Operator operator = this.getByDeviceId(deviceId);
+        if(operator.getState() != state){
+            operator.setState(state);
+            OperatorHistory oh = new OperatorHistory(operator.getState(), operator,operator.getUser());
+            operatorRepository.save(operator);
+            operatorHRepo.save(oh);
+        }
+    }
+    public void changeStateByApi(Long operatorId, boolean operatorState){
+        Operator operator = this.get(operatorId);
+        String topic = "device/" + operator.getUser().getToken() + "/" + operator.getDeviceId() + "/operator";
         try {
-            if (state)
+            if (operatorState) {
                 mqttGateway.sendToMqtt(topic, 1, "1");
-            else
+            }else {
                 mqttGateway.sendToMqtt(topic, 1, "0");
+            }
         } catch (Exception e) {
             System.out.println("mqtt exception: " + e.getMessage());
             e.printStackTrace();
         }
-        operator.setState(state);
-        OperatorHistory oh = new OperatorHistory(operator.getState(), operator.getId());
-        operatorHRepo.save(oh);
-        operatorRepository.save(operator);
     }
-    public void setHealthCheckDate(Long id, String token, String payload){
-        Operator operator = this.get(id);
+    public void operatorHealthCheck(UUID deviceId, String token, String payload){
+        Operator operator = this.getByDeviceId(deviceId);
         if(operator.getUser().getToken().equals(token)){
-            operator.setLastHealthCheckDate(new Date());
-            operator.setStatus(DeviceStatus.GREEN);
+            long difference = Utils.calculateDiffTime(System.currentTimeMillis() , operator.getLastHealthCheckDate());
+            if(difference < 31000){
+                operator.setStatus(DeviceStatus.GREEN);
+            }else if (difference < 61000){
+                operator.setStatus(DeviceStatus.YELLOW);
+            }
+            else {
+                operator.setStatus(DeviceStatus.RED);
+            }
+            operator.setLastHealthCheckDate(LocalDateTime.now());
             if(payload.equals("1")){
                 operator.setState(true);
             }
@@ -117,14 +131,12 @@ public class OperatorService {
             operatorRepository.save(operator);
         }
     }
-    public void OperatorHealthCheck(Long userId){
-        List<Operator> operators = this.getAllByUser(userId,null);
+    public void intervalHealthCheck(){
+        List<Operator> operators = operatorRepository.findByLastHealthCheckDateBefore(LocalDateTime.now().minusSeconds(31));
         if(!operators.isEmpty()) {
             for (Operator operator : operators) {
-                if (new Date().getTime() - operator.getLastHealthCheckDate().getTime() > 60000) {
                     operator.setStatus(DeviceStatus.RED);
                     operatorRepository.save(operator);
-                }
             }
         }
     }
@@ -132,14 +144,15 @@ public class OperatorService {
         User user = userService.get(uid);
         Operator operator = this.get(oid);
 
-        if (!operator.getShared().getTarget_users().contains(user))
+        if (!operator.getShared().getTargetUsers().contains(user))
             throw new BadRequestException("access denied");
 
-        String topic = "operator/" + operator.getUser().getToken();
+        String topic = "device/" + operator.getUser().getToken() + "/" + operator.getDeviceId();
         try {
             mqttGateway.sendToMqtt(topic, 1, String.valueOf(state));
             operator.setState(state);
             operatorRepository.save(operator);
+            operatorHRepo.save(new OperatorHistory(state, operator,user));
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
 
@@ -150,6 +163,10 @@ public class OperatorService {
     public Operator get(Long id) {
         return operatorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Operator Not Found with id " + id));
+    }
+    public Operator getByDeviceId(UUID dviceId){
+        return operatorRepository.findByDeviceId(dviceId)
+                .orElseThrow(() -> new NotFoundException("not found"));
     }
 
     public List<Operator> getAllByUser(Long user_id, String key) {
@@ -169,12 +186,16 @@ public class OperatorService {
         this.get(id);
         if (searchRequest.getStartDate() != null) {
             if (searchRequest.getEndDate() != null) {
-                return operatorHRepo.findAllWithBetweenDate(new Date(searchRequest.getStartDate()),
-                        new Date(searchRequest.getEndDate()));
+                return operatorHRepo
+                        .findAllWithBetweenDate(
+                                LocalDateTime.ofInstant(Instant.ofEpochMilli(searchRequest.getStartDate()), ZoneId.systemDefault()),
+                                LocalDateTime.ofInstant(Instant.ofEpochMilli(searchRequest.getEndDate()), ZoneId.systemDefault()));
             }
-            return operatorHRepo.findAllWithStartDate(new Date(searchRequest.getStartDate()));
+            return operatorHRepo
+                    .findAllWithStartDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(searchRequest.getStartDate()), ZoneId.systemDefault()));
         } else if (searchRequest.getEndDate() != null) {
-            return operatorHRepo.findAllWithEndDate(new Date(searchRequest.getEndDate()));
+            return operatorHRepo
+                    .findAllWithEndDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(searchRequest.getEndDate()), ZoneId.systemDefault()));
         } else {
             return operatorHRepo.findByOperator_id(id);
         }

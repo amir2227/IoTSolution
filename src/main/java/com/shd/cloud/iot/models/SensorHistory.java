@@ -7,7 +7,8 @@ import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Id;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -18,17 +19,14 @@ public class SensorHistory {
     @Id
     private String id;
     private String data;
-    private Long sensorId;
+    private UUID deviceId;
 
-    private Date updatedAt;
+    private LocalDateTime lastUpdate;
 
-    private Date lastUpdate;
-
-    public SensorHistory(String data, Long sensor_id) {
+    public SensorHistory(String data, UUID deviceId) {
         this.data = data;
-        this.updatedAt = new Date();
-        this.sensorId = sensor_id;
-        this.lastUpdate = new Date();
+        this.deviceId = deviceId;
+        this.lastUpdate = LocalDateTime.now();
     }
 
 

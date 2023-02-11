@@ -1,0 +1,94 @@
+version: '3'
+
+services:
+  emqx1:
+    image: emqx:4.4.14
+    container_name: emqx1
+    environment:
+      - "EMQX_NAME=emqx"
+      - "EMQX_HOST=127.0.0.1"
+      - "EMQX_NODE__NAME=emqx@127.0.0.1"
+      - "EMQX_CLUSTER__DISCOVERY=static"
+      - "EMQX_CLUSTER__STATIC__SEEDS=emqx@127.0.0.1,emqx@node2.emqx.io"
+      - "EMQX_ZONE__EXTERNAL__RETRY_INTERVAL=2s"
+      - "EMQX_MQTT__MAX_TOPIC_ALIAS=10"
+      - "EMQX_ALLOW_ANONYMOUS=false"
+      - "EMQX_ZONE__INTERNAL__ALLOW_ANONYMOUS=false"
+      - "EMQX_ZONE__INTERNAL__ENABLE_ACL=on"
+      - "EMQX_ACL_NOMATCH=deny"
+      - "EMQX_ENABLE_ACL_CACHE=off"
+      - "EMQX_AUTH_ORDER=pgsql"
+      - "EMQX_ACL_ORDER=pgsql"
+    healthcheck:
+      test: ["CMD", "/opt/emqx/bin/emqx_ctl", "status"]
+      interval: 5s
+      timeout: 25s
+      retries: 5
+    networks:
+      pgnet:
+      emqx-bridge:
+        aliases:
+          - node1.emqx.com
+    ports:
+      - 1883:1883
+      - 8083:8083
+      - 8084:8084
+      - 8883:8883
+      - 18083:18083
+      - 8081:8081
+    volumes:
+      - emqx1_data:/opt/emqx/data
+      - ./tmp/emqx.lic:/opt/emqx/etc/emqx.lic
+      - ./emqx1/emqx_auth_pgsql.conf:/opt/emqx/etc/plugins/emqx_auth_pgsql.conf:ro
+      - ./emqx1/acl.conf:/opt/emqx/etc/acl.conf:ro
+  emqx2:
+    image: emqx:4.4.14
+    container_name: emqx2
+    environment:
+      - "EMQX_NAME=emqx"
+      - "EMQX_HOST=node2.emqx.io"
+      - "EMQX_NODE__NAME=emqx@node2.emqx.io"
+      - "EMQX_CLUSTER__DISCOVERY=static"
+      - "EMQX_CLUSTER__STATIC__SEEDS=emqx@127.0.0.1,emqx@node2.emqx.io"
+      - "EMQX_ZONE__EXTERNAL__RETRY_INTERVAL=2s"
+      - "EMQX_MQTT__MAX_TOPIC_ALIAS=10"
+      - "EMQX_ALLOW_ANONYMOUS=false"
+      - "EMQX_ZONE__INTERNAL__ALLOW_ANONYMOUS=false"
+      - "EMQX_ZONE__INTERNAL__ENABLE_ACL=on"
+      - "EMQX_ACL_NOMATCH=deny"
+      - "EMQX_ENABLE_ACL_CACHE=off"
+      - "EMQX_AUTH_ORDER=pgsql"
+      - "EMQX_ACL_ORDER=pgsql"
+    healthcheck:
+      test: ["CMD", "/opt/emqx/bin/emqx_ctl", "status"]
+      interval: 5s
+      timeout: 25s
+      retries: 5
+    networks:
+      pgnet:
+      emqx-bridge:
+        aliases:
+          - node2.emqx.com
+    volumes:
+      - emqx2_data:/opt/emqx/data
+      - ./tmp2/emqx.lic:/opt/emqx/etc/emqx.lic
+      - ./emqx2/emqx_auth_pgsql.conf:/opt/emqx/etc/plugins/emqx_auth_pgsql.conf:ro
+      - ./emqx2/acl.conf:/opt/emqx/etc/acl.conf:ro
+  client:
+    image: python:3.7.2-alpine3.9
+    depends_on:
+      - emqx1
+      - emqx2
+    tty: true
+    networks:
+      emqx-bridge:
+
+networks:
+  emqx-bridge:
+    driver: bridge
+  pgnet:
+    external: true
+
+volumes:
+  emqx1_data:
+  emqx2_data:

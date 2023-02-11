@@ -1,7 +1,9 @@
 package com.shd.cloud.iot.repositorys;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.shd.cloud.iot.models.Sensor;
 
@@ -14,7 +16,9 @@ import org.springframework.stereotype.Repository;
 public interface SensorRepository extends JpaRepository<Sensor, Long> {
     Boolean existsByNameAndUser_id(String name, Long user_id);
 
+    Optional<Sensor> findByDeviceId(UUID deviceId);
     List<Sensor> findByUser_id(Long user_id);
+    List<Sensor> findByLastHealthCheckDateBefore(LocalDateTime time);
 
     Optional<Sensor> findByIdAndUser_id(Long id, Long user_id);
 

@@ -10,6 +10,7 @@ import com.shd.cloud.iot.payload.request.LocationRequest;
 import com.shd.cloud.iot.repositorys.LocationRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 
 @Service

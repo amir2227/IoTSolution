@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.ws.rs.QueryParam;
 import java.util.List;
+import java.util.UUID;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -75,17 +76,8 @@ public class SensorController extends handleValidationExceptions {
 
     @ApiOperation(value = "get all sensor histories")
     @GetMapping("/{id}/history")
-    public ResponseEntity<SearchResponse> getSensorHistory(@PathVariable("id") Long id, @Valid SearchRequest sRequest) {
+    public ResponseEntity<SearchResponse> getSensorHistory(@PathVariable("id") UUID id, @Valid SearchRequest sRequest) {
         List<SensorHistory> sh = sensorService.searchHistory(id, sRequest);
         return ResponseEntity.ok(ResponseMapper.map(sh));
-    }
-
-    @ApiOperation(value = "sensor health check request")
-    @GetMapping("/check")
-    public ResponseEntity<MessageResponse> healthCheck(){
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-        sensorService.sensorHealthCheck(userDetails.getId());
-        return ResponseEntity.ok(ResponseMapper.map("checked"));
     }
 }

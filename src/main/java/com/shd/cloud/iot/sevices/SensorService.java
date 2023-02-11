@@ -1,28 +1,25 @@
 package com.shd.cloud.iot.sevices;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import com.shd.cloud.iot.enums.DeviceStatus;
 import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
 import com.shd.cloud.iot.exception.NotFoundException;
-import com.shd.cloud.iot.models.Location;
-import com.shd.cloud.iot.models.Scenario;
-import com.shd.cloud.iot.models.ScenarioOperators;
-import com.shd.cloud.iot.models.ScenarioSensors;
-import com.shd.cloud.iot.models.Sensor;
-import com.shd.cloud.iot.models.SensorHistory;
-import com.shd.cloud.iot.models.User;
+import com.shd.cloud.iot.models.*;
 import com.shd.cloud.iot.payload.request.EditSensorRequest;
 import com.shd.cloud.iot.payload.request.SearchRequest;
-import com.shd.cloud.iot.payload.request.SensorHistoryRequest;
 import com.shd.cloud.iot.payload.request.SensorRequest;
 import com.shd.cloud.iot.repositorys.ScenarioSensorsRepository;
 import com.shd.cloud.iot.repositorys.SensorHistoryRepository;
 import com.shd.cloud.iot.repositorys.SensorRepository;
 
+import com.shd.cloud.iot.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,6 +48,8 @@ public class SensorService {
         }
         sensor.setUser(user);
         sensor.setStatus(DeviceStatus.RED);
+        sensor.setDeviceId(UUID.randomUUID());
+        sensorHistoryRepository.save(new SensorHistory("0",sensor.getDeviceId()));
         return sensorRepository.save(sensor);
     }
 
@@ -65,6 +64,10 @@ public class SensorService {
                 .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
+    public Sensor getByDeviceId(UUID deviceId){
+        return sensorRepository.findByDeviceId(deviceId)
+                .orElseThrow(()-> new RuntimeException("sensor not found"));
+    }
     public List<Sensor> getAllByUser(Long user_id, String key) {
         if (key != null) {
             return sensorRepository.search(key, user_id);
@@ -101,69 +104,90 @@ public class SensorService {
 
     }
 
-    public List<SensorHistory> searchHistory(Long id, SearchRequest sRequest) {
+    public List<SensorHistory> searchHistory(UUID deviceId, SearchRequest sRequest) {
+        if(sRequest != null){
             if (sRequest.getStartDate() != null) {
                 if (sRequest.getEndDate() != null) {
-                    return sensorHistoryRepository.findAllWithBetweenDate(new Date(sRequest.getStartDate()),
-                            new Date(sRequest.getEndDate()));
+                    return sensorHistoryRepository
+                            .findAllWithBetweenDate(
+                                LocalDateTime.ofInstant(Instant.ofEpochMilli(sRequest.getStartDate()), ZoneId.systemDefault()),
+                                LocalDateTime.ofInstant(Instant.ofEpochMilli(sRequest.getEndDate()), ZoneId.systemDefault()));
                 }
-                return sensorHistoryRepository.findAllWithStartDate(new Date(sRequest.getStartDate()));
+                return sensorHistoryRepository
+                        .findAllWithStartDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(sRequest.getStartDate()), ZoneId.systemDefault()));
             } else if (sRequest.getEndDate() != null) {
-                return sensorHistoryRepository.findAllWithEndDate(new Date(sRequest.getEndDate()));
-            } else {
-                return sensorHistoryRepository.findBySensorId(id);
+                return sensorHistoryRepository
+                        .findAllWithEndDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(sRequest.getEndDate()), ZoneId.systemDefault()));
+            }else return sensorHistoryRepository.findByDeviceId(deviceId);
+        } else {
+                return sensorHistoryRepository.findByDeviceId(deviceId);
             }
     }
-    public List<SensorHistory> searchHistory(Long id){
-        log.info("in search all history sensor");
-        return sensorHistoryRepository.findBySensorId(id);
-    }
-
-
-    public SensorHistory saveSensorHistory(Long sid, SensorHistoryRequest shr) {
-        Sensor sensor = this.get(sid);
-        if (!sensor.getUser().getToken().equals(shr.getToken())) {
-            throw new BadRequestException("not valid request");
+    public void saveSensorHistory(UUID deviceId, String token, String data) {
+        Sensor sensor = this.getByDeviceId(deviceId);
+        if (!sensor.getUser().getToken().equals(token)) {
+           throw new BadRequestException("access denied");
         }
         log.info("in save history");
         List<ScenarioSensors> scenarioSensors = scenarioSensorsRepository.findBySensor_id(sensor.getId());
         if (scenarioSensors != null && scenarioSensors.size() > 0) {
             for (ScenarioSensors s_sensor : scenarioSensors) {
-                if (checkModality(shr.getData(), s_sensor)) {
+                if (checkModality(data, s_sensor)) {
                     manageScenario(s_sensor);
                 }
 
             }
         }
-        SensorHistory sensorHistory = new SensorHistory(shr.getData(), sensor.getId());
-        sensor.setStatus(DeviceStatus.YELLOW);
-        sensorRepository.save(sensor);
-        return sensorHistoryRepository.save(sensorHistory);
+        SensorHistory sensorHistory = new SensorHistory(data, deviceId);
+        sensorHistoryRepository.save(sensorHistory);
     }
-    // health check of sensor list
-    public void sensorHealthCheck(Long userId){
-        List<Sensor> sensors = sensorRepository.findByUser_id(userId);
-        if(!sensors.isEmpty()) {
-            for (Sensor sensor : sensors) {
-                Date lastUpdate = sensorHistoryRepository.findFirstBySensorIdOrderByLastUpdateDesc(sensor.getId()).getLastUpdate();
-                if (new Date().getTime() - lastUpdate.getTime() > 31000) {
+    public boolean existHistory(UUID deviceId){
+        return sensorHistoryRepository.existsByDeviceId(deviceId);
+    }
+    public SensorHistory findLastSensorHistory(UUID deviceId){
+    return sensorHistoryRepository.findFirstByDeviceIdOrderByLastUpdateDesc(deviceId)
+            .orElseThrow(() -> new RuntimeException("sensor history "+deviceId+" not found"));
+    }
+    // health check of sensor
+    public void sensorHealthCheck(UUID deviceId, String token){
+            Sensor sensor = getByDeviceId(deviceId);
+            if (sensor.getUser().getToken().equals(token)) {
+                long difference = Utils.calculateDiffTime(System.currentTimeMillis(), sensor.getLastHealthCheckDate());
+                if (difference < 31000) {
+                    sensor.setStatus(DeviceStatus.GREEN);
+                } else if (difference < 61000) {
+                    sensor.setStatus(DeviceStatus.YELLOW);
+                } else {
                     sensor.setStatus(DeviceStatus.RED);
-                    sensorRepository.save(sensor);
                 }
+                sensor.setLastHealthCheckDate(LocalDateTime.now());
             }
-        }
+            sensorRepository.save(sensor);
+
     }
     public void changeLastUpdateHistory(String id){
-        SensorHistory sensorHistory = sensorHistoryRepository.findById(id).orElseThrow(()-> new RuntimeException("sensor with id "+ id + " not found"));
-        Date now = new Date();
+        SensorHistory sensorHistory = sensorHistoryRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("sensor with id "+ id + " not found"));
+
+        Sensor sensor = this.getByDeviceId(sensorHistory.getDeviceId());
         // if next sensor data is less than 31 second sensor status change to green
-        if(now.getTime() - sensorHistory.getLastUpdate().getTime() < 31000){
-            Sensor sensor = this.get(sensorHistory.getSensorId());
+        if(Utils.calculateDiffTime(System.currentTimeMillis(),sensor.getLastHealthCheckDate())< 31000){
             sensor.setStatus(DeviceStatus.GREEN);
-            sensorRepository.save(sensor);
+        }else {
+            sensor.setStatus(DeviceStatus.YELLOW);
         }
-        sensorHistory.setLastUpdate(now);
+        sensorRepository.save(sensor);
+        sensorHistory.setLastUpdate(LocalDateTime.now());
         sensorHistoryRepository.save(sensorHistory);
+    }
+    public void intervalHealthCheck(){
+        List<Sensor> sensors = sensorRepository.findByLastHealthCheckDateBefore(LocalDateTime.now().minusSeconds(31));
+        if (!sensors.isEmpty()){
+            for (Sensor sensor : sensors){
+                sensor.setStatus(DeviceStatus.RED);
+                sensorRepository.save(sensor);
+            }
+        }
     }
     private boolean checkModality(String data, ScenarioSensors s_sensor) {
         float firstPoint = Float.parseFloat(s_sensor.getPoints().split(",")[0]);
@@ -205,13 +229,14 @@ public class SensorService {
 
     private void manageScenario(ScenarioSensors s_sensor) {
         Scenario scenario = s_sensor.getScenario();
-        List<ScenarioSensors> scenarioSensors = scenario.getEffective_sensors();
+        List<ScenarioSensors> scenarioSensors = scenario.getEffectiveSensors();
         boolean flag = true;
         if (scenarioSensors.size() > 0) {
             for (ScenarioSensors scenarioSensor : scenarioSensors) {
                 if (Objects.equals(scenarioSensor.getId(), s_sensor.getId()))
                     continue;
-                List<SensorHistory> sensorHistories = sensorHistoryRepository.findBySensorId(scenarioSensor.getSensor().getId());
+                List<SensorHistory> sensorHistories = sensorHistoryRepository
+                        .findByDeviceId(scenarioSensor.getSensor().getDeviceId());
                 int hsize = sensorHistories.size();
                 String data = sensorHistories.get(hsize - 1).getData();
                 if (!checkModality(data, scenarioSensor)) {
@@ -224,9 +249,9 @@ public class SensorService {
 
             }
             if (flag) {
-                List<ScenarioOperators> scenarioOperators = scenario.getTarget_operators();
+                List<ScenarioOperators> scenarioOperators = scenario.getTargetOperators();
                 for (ScenarioOperators s_operator : scenarioOperators) {
-                    operatorService.changeState(s_operator.getOperator().getId(), s_operator.getOperator_state());
+                    operatorService.changeStateByApi(s_operator.getOperator().getId(), s_operator.getOperator_state());
                 }
             }
         }

@@ -58,16 +58,4 @@ public class AuthController extends handleValidationExceptions {
         User user = userService.create(signUpRequest);
         return ResponseEntity.created(URI.create("/api/auth/signup")).body(ResponseMapper.map(user));
     }
-
-//    @PostMapping(path="/taskdef", consumes = "application/json", produces="application/json")
-//    public void scheduleATask(@RequestBody CronRequest taskDefinition) {
-//        taskDefinitionBean.setCronRequest(taskDefinition);
-//        taskSchedulingService.scheduleATask(UUID.randomUUID().toString(), taskDefinitionBean, taskDefinition.getCron());
-//    }
-//
-//    @GetMapping(path="/remove/{jobid}")
-//    public void removeJob(@PathVariable String jobid) {
-//        taskSchedulingService.removeScheduledTask(jobid);
-//    }
-
 }

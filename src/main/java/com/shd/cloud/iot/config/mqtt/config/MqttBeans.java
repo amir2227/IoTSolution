@@ -2,7 +2,7 @@ package com.shd.cloud.iot.config.mqtt.config;
 
 import java.util.Objects;
 
-import com.shd.cloud.iot.sevices.MqttService;
+import com.shd.cloud.iot.sevices.MqttHandler;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +23,7 @@ import org.springframework.messaging.MessageHandler;
 @Configuration
 @RequiredArgsConstructor
 public class MqttBeans {
-    private final MqttService mqttService;
+    private final MqttHandler mqttHandler;
 
     @Value("${message.broker.host}")
     private String host;
@@ -37,12 +37,11 @@ public class MqttBeans {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
         options.setServerURIs(new String[] { "tcp://" + host + ":" + port });
-        // options.setUserName("admin");
-        // String pass = "12345678";
-        // options.setPassword(pass.toCharArray());
+         options.setUserName("emqx");
+         String pass = "qazwsx";
+         options.setPassword(pass.toCharArray());
         options.setCleanSession(true);
         factory.setConnectionOptions(options);
-
         return factory;
     }
 
@@ -67,7 +66,7 @@ public class MqttBeans {
     public MessageHandler mqttOutbound() {
         MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(MQTT_PUBLISHER_ID, mqttClientFactory());
         messageHandler.setAsync(true);
-        messageHandler.setDefaultTopic("defaultTopic");
+        messageHandler.setDefaultTopic("healthCheck");
         return messageHandler;
     }
 
@@ -89,7 +88,7 @@ public class MqttBeans {
         return message -> {
             String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
             String payload = message.getPayload().toString();
-            mqttService.handleMessage(topic,payload);
+            mqttHandler.handleMessage(topic,payload);
         };
     }
 

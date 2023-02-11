@@ -1,5 +1,6 @@
 package com.shd.cloud.iot.models;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -22,7 +23,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "scenario")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class Scenario {
@@ -36,15 +36,24 @@ public class Scenario {
 
     private Boolean isActive;
 
-    @OneToMany(mappedBy = "scenario", cascade = { CascadeType.REMOVE })
-    private List<ScenarioOperators> target_operators;
+    @Column(columnDefinition = "timestamp")
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "scenario", cascade = { CascadeType.REMOVE })
-    private List<ScenarioSensors> effective_sensors;
+    private List<ScenarioOperators> targetOperators;
+
+    @OneToMany(mappedBy = "scenario", cascade = { CascadeType.REMOVE })
+    private List<ScenarioSensors> effectiveSensors;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    public Scenario(String description, Boolean isActive, User user) {
+        this.description = description;
+        this.isActive = isActive;
+        this.user = user;
+        this.createdAt = LocalDateTime.now();
+    }
 }

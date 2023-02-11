@@ -1,5 +1,6 @@
 package com.shd.cloud.iot.repositorys;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -13,9 +14,9 @@ public interface OperatorHistoryRepository extends MongoRepository<OperatorHisto
     @Query("{'operatorId': {$eq: ?0}}")
     List<OperatorHistory> findByOperator_id(Long operator_id);
     @Query("{'updatedAt': { $lte:  ?0 } }")
-    List<OperatorHistory> findAllWithEndDate(Date endDate);
+    List<OperatorHistory> findAllWithEndDate(LocalDateTime endDate);
     @Query("{'updatedAt': { $gte: ?0 } }")
-    List<OperatorHistory> findAllWithStartDate(Date startDate);
+    List<OperatorHistory> findAllWithStartDate(LocalDateTime startDate);
     @Query("{'updatedAt' : { $gte: ?0, $lte: ?1 } }")
-    List<OperatorHistory> findAllWithBetweenDate(Date startDate, Date endDate);
+    List<OperatorHistory> findAllWithBetweenDate(LocalDateTime startDate, LocalDateTime endDate);
 }

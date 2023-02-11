@@ -1,7 +1,10 @@
 package com.shd.cloud.iot.repositorys;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import com.shd.cloud.iot.models.SensorHistory;
 
@@ -11,13 +14,15 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SensorHistoryRepository extends MongoRepository<SensorHistory, String> {
-        @Query("{'sensorId': {$eq: ?0}}")
-        List<SensorHistory> findBySensorId(Long sensorId);
+
+        Boolean existsByDeviceId(UUID deviceId);
+        Optional<SensorHistory> findFirstByDeviceIdOrderByLastUpdateDesc(UUID deviceId);
+        @Query("{'deviceId': {$eq: ?0}}")
+        List<SensorHistory> findByDeviceId(UUID deviceId);
         @Query("{'updatedAt': { $lte:  ?0 } }")
-        List<SensorHistory> findAllWithEndDate(Date endDate);
+        List<SensorHistory> findAllWithEndDate(LocalDateTime endDate);
         @Query("{'updatedAt': { $gte:  ?0 } }")
-        List<SensorHistory> findAllWithStartDate(Date startDate);
+        List<SensorHistory> findAllWithStartDate(LocalDateTime startDate);
         @Query("{'updatedAt' : { $gte: ?0, $lte: ?1 } }")
-        List<SensorHistory> findAllWithBetweenDate(Date startDate, Date endDate);
-        SensorHistory findFirstBySensorIdOrderByLastUpdateDesc(Long sensorId);
+        List<SensorHistory> findAllWithBetweenDate(LocalDateTime startDate, LocalDateTime endDate);
 }

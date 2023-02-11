@@ -1,5 +1,6 @@
 package com.shd.cloud.iot.models;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -37,6 +38,9 @@ public class Location {
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private JsonNode geometric;
+
+    @Column(columnDefinition = "timestamp")
+    private LocalDateTime createdAt;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -52,6 +56,7 @@ public class Location {
         this.name = name;
         this.type = type;
         this.user = user;
+        this.createdAt = LocalDateTime.now();
     }
 
 }
