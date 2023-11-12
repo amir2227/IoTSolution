@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.shd.cloud.iot.enums.DeviceStatus;
@@ -64,9 +65,8 @@ public class SensorService {
                 .orElseThrow(() -> new NotFoundException("Sensor Not Found with id: " + id));
     }
 
-    public Sensor getByDeviceId(UUID deviceId){
-        return sensorRepository.findByDeviceId(deviceId)
-                .orElseThrow(()-> new RuntimeException("sensor not found"));
+    public Optional<Sensor> getByDeviceId(UUID deviceId){
+        return sensorRepository.findByDeviceId(deviceId);
     }
     public List<Sensor> getAllByUser(Long user_id, String key) {
         if (key != null) {
@@ -124,22 +124,25 @@ public class SensorService {
             }
     }
     public void saveSensorHistory(UUID deviceId, String token, String data) {
-        Sensor sensor = this.getByDeviceId(deviceId);
-        if (!sensor.getUser().getToken().equals(token)) {
-           throw new BadRequestException("access denied");
-        }
-        log.info("in save history");
-        List<ScenarioSensors> scenarioSensors = scenarioSensorsRepository.findBySensor_id(sensor.getId());
-        if (scenarioSensors != null && scenarioSensors.size() > 0) {
-            for (ScenarioSensors s_sensor : scenarioSensors) {
-                if (checkModality(data, s_sensor)) {
-                    manageScenario(s_sensor);
-                }
-
+        log.info("in save sensor history");
+        Optional<Sensor> sensor = this.getByDeviceId(deviceId);
+        if (sensor.isPresent()) {
+            if (!sensor.get().getUser().getToken().equals(token)) {
+                throw new BadRequestException("access denied");
             }
+            log.info("in save history");
+            List<ScenarioSensors> scenarioSensors = scenarioSensorsRepository.findBySensor_id(sensor.get().getId());
+            if (scenarioSensors != null && scenarioSensors.size() > 0) {
+                for (ScenarioSensors s_sensor : scenarioSensors) {
+                    if (checkModality(data, s_sensor)) {
+                        manageScenario(s_sensor);
+                    }
+
+                }
+            }
+            SensorHistory sensorHistory = new SensorHistory(data, deviceId);
+            sensorHistoryRepository.save(sensorHistory);
         }
-        SensorHistory sensorHistory = new SensorHistory(data, deviceId);
-        sensorHistoryRepository.save(sensorHistory);
     }
     public boolean existHistory(UUID deviceId){
         return sensorHistoryRepository.existsByDeviceId(deviceId);
@@ -150,35 +153,40 @@ public class SensorService {
     }
     // health check of sensor
     public void sensorHealthCheck(UUID deviceId, String token){
-            Sensor sensor = getByDeviceId(deviceId);
-            if (sensor.getUser().getToken().equals(token)) {
-                long difference = Utils.calculateDiffTime(System.currentTimeMillis(), sensor.getLastHealthCheckDate());
-                if (difference < 31000) {
-                    sensor.setStatus(DeviceStatus.GREEN);
-                } else if (difference < 61000) {
-                    sensor.setStatus(DeviceStatus.YELLOW);
-                } else {
-                    sensor.setStatus(DeviceStatus.RED);
+            Optional<Sensor> optionalSensor = getByDeviceId(deviceId);
+            if (optionalSensor.isPresent()) {
+                Sensor sensor = optionalSensor.get();
+                if (sensor.getUser().getToken().equals(token)) {
+                    long difference = Utils.calculateDiffTime(System.currentTimeMillis(), sensor.getLastHealthCheckDate());
+                    if (difference < 31000) {
+                        sensor.setStatus(DeviceStatus.GREEN);
+                    } else if (difference < 61000) {
+                        sensor.setStatus(DeviceStatus.YELLOW);
+                    } else {
+                        sensor.setStatus(DeviceStatus.RED);
+                    }
+                    sensor.setLastHealthCheckDate(LocalDateTime.now());
                 }
-                sensor.setLastHealthCheckDate(LocalDateTime.now());
+                sensorRepository.save(sensor);
+            }
+    }
+    public void changeLastUpdateHistory(String id) {
+        SensorHistory sensorHistory = sensorHistoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("sensor with id " + id + " not found"));
+
+        Optional<Sensor> optionalSensor = this.getByDeviceId(sensorHistory.getDeviceId());
+        if (optionalSensor.isPresent()) {
+            Sensor sensor = optionalSensor.get();
+            // if next sensor data is less than 31 second sensor status change to green
+            if (Utils.calculateDiffTime(System.currentTimeMillis(), sensor.getLastHealthCheckDate()) < 31000) {
+                sensor.setStatus(DeviceStatus.GREEN);
+            } else {
+                sensor.setStatus(DeviceStatus.YELLOW);
             }
             sensorRepository.save(sensor);
-
-    }
-    public void changeLastUpdateHistory(String id){
-        SensorHistory sensorHistory = sensorHistoryRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("sensor with id "+ id + " not found"));
-
-        Sensor sensor = this.getByDeviceId(sensorHistory.getDeviceId());
-        // if next sensor data is less than 31 second sensor status change to green
-        if(Utils.calculateDiffTime(System.currentTimeMillis(),sensor.getLastHealthCheckDate())< 31000){
-            sensor.setStatus(DeviceStatus.GREEN);
-        }else {
-            sensor.setStatus(DeviceStatus.YELLOW);
+            sensorHistory.setLastUpdate(LocalDateTime.now());
+            sensorHistoryRepository.save(sensorHistory);
         }
-        sensorRepository.save(sensor);
-        sensorHistory.setLastUpdate(LocalDateTime.now());
-        sensorHistoryRepository.save(sensorHistory);
     }
     public void intervalHealthCheck(){
         List<Sensor> sensors = sensorRepository.findByLastHealthCheckDateBefore(LocalDateTime.now().minusSeconds(31));

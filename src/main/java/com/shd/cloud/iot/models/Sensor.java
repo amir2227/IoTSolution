@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.shd.cloud.iot.enums.DeviceStatus;
-import com.shd.cloud.iot.enums.ERole;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -62,6 +61,7 @@ public class Sensor {
         this.name = name;
         this.type = type;
         this.createdAt = LocalDateTime.now();
+        this.lastHealthCheckDate = LocalDateTime.now();
     }
 
 

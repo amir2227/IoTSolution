@@ -36,6 +36,9 @@ public class ResponseMapper {
                 .name(sensor.getName())
                 .type(sensor.getType())
                 .status(sensor.getStatus())
+                .deviceId(sensor.getDeviceId())
+                .createdAt(sensor.getCreatedAt())
+                .lastHealthCheck(sensor.getLastHealthCheckDate())
                 .location(sensor.getLocation() != null ? sensor.getLocation().getName() : null)
                 .scenarios(sensor.getScenarios() == null ? null
                         : sensor.getScenarios().stream()

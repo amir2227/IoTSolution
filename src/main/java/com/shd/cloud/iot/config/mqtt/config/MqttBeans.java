@@ -25,10 +25,12 @@ import org.springframework.messaging.MessageHandler;
 public class MqttBeans {
     private final MqttHandler mqttHandler;
 
-    @Value("${message.broker.host}")
-    private String host;
-    @Value("${message.broker.port}")
-    private String port;
+    @Value("${message.broker.uri}")
+    private String uri;
+    @Value("${message.broker.user}")
+    private String user;
+    @Value("${message.broker.pass}")
+    private String pass;
 
     private static final String MQTT_PUBLISHER_ID = "spring-server";
 
@@ -36,9 +38,8 @@ public class MqttBeans {
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
-        options.setServerURIs(new String[] { "tcp://" + host + ":" + port });
-         options.setUserName("emqx");
-         String pass = "qazwsx";
+        options.setServerURIs(new String[] { uri });
+         options.setUserName(user);
          options.setPassword(pass.toCharArray());
         options.setCleanSession(true);
         factory.setConnectionOptions(options);

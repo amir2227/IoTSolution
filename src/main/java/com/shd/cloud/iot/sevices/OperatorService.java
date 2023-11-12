@@ -4,10 +4,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Resource;
-
 import com.shd.cloud.iot.enums.DeviceStatus;
 import com.shd.cloud.iot.exception.BadRequestException;
 import com.shd.cloud.iot.exception.DuplicatException;
@@ -87,12 +87,15 @@ public class OperatorService {
         return operatorRepository.save(operator);
     }
     public void changeStateByMqtt(UUID deviceId, boolean state){
-        Operator operator = this.getByDeviceId(deviceId);
-        if(operator.getState() != state){
-            operator.setState(state);
-            OperatorHistory oh = new OperatorHistory(operator.getState(), operator,operator.getUser());
-            operatorRepository.save(operator);
-            operatorHRepo.save(oh);
+        Optional<Operator> optionalOperator = this.getByDeviceId(deviceId);
+        if (optionalOperator.isPresent()) {
+            Operator operator = optionalOperator.get();
+            if (operator.getState() != state) {
+                operator.setState(state);
+                OperatorHistory oh = new OperatorHistory(operator.getState(), operator, operator.getUser());
+                operatorRepository.save(operator);
+                operatorHRepo.save(oh);
+            }
         }
     }
     public void changeStateByApi(Long operatorId, boolean operatorState){
@@ -110,25 +113,26 @@ public class OperatorService {
         }
     }
     public void operatorHealthCheck(UUID deviceId, String token, String payload){
-        Operator operator = this.getByDeviceId(deviceId);
-        if(operator.getUser().getToken().equals(token)){
-            long difference = Utils.calculateDiffTime(System.currentTimeMillis() , operator.getLastHealthCheckDate());
-            if(difference < 31000){
-                operator.setStatus(DeviceStatus.GREEN);
-            }else if (difference < 61000){
-                operator.setStatus(DeviceStatus.YELLOW);
+        Optional<Operator> optionalOperator = this.getByDeviceId(deviceId);
+        if (optionalOperator.isPresent()) {
+            Operator operator = optionalOperator.get();
+            if (operator.getUser().getToken().equals(token)) {
+                long difference = Utils.calculateDiffTime(System.currentTimeMillis(), operator.getLastHealthCheckDate());
+                if (difference < 31000) {
+                    operator.setStatus(DeviceStatus.GREEN);
+                } else if (difference < 61000) {
+                    operator.setStatus(DeviceStatus.YELLOW);
+                } else {
+                    operator.setStatus(DeviceStatus.RED);
+                }
+                operator.setLastHealthCheckDate(LocalDateTime.now());
+                if (payload.equals("1")) {
+                    operator.setState(true);
+                } else if (payload.equals("0")) {
+                    operator.setState(false);
+                }
+                operatorRepository.save(operator);
             }
-            else {
-                operator.setStatus(DeviceStatus.RED);
-            }
-            operator.setLastHealthCheckDate(LocalDateTime.now());
-            if(payload.equals("1")){
-                operator.setState(true);
-            }
-            else if (payload.equals("0")) {
-                operator.setState(false);
-            }
-            operatorRepository.save(operator);
         }
     }
     public void intervalHealthCheck(){
@@ -164,9 +168,8 @@ public class OperatorService {
         return operatorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Operator Not Found with id " + id));
     }
-    public Operator getByDeviceId(UUID dviceId){
-        return operatorRepository.findByDeviceId(dviceId)
-                .orElseThrow(() -> new NotFoundException("not found"));
+    public Optional<Operator> getByDeviceId(UUID dviceId){
+        return operatorRepository.findByDeviceId(dviceId);
     }
 
     public List<Operator> getAllByUser(Long user_id, String key) {

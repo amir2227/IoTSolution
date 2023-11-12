@@ -41,10 +41,10 @@ public class UserService {
 
     public User create(SignupRequest signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            throw new DuplicatException("Duplicate email");
+            throw new BadRequestException("Duplicate email");
         }
         if (userRepository.existsByPhone(signUpRequest.getPhone())) {
-            throw new DuplicatException("Duplicate phone");
+            throw new BadRequestException("Duplicate phone");
         }
         // Create new user's account
         User user = new User(signUpRequest.getEmail(),

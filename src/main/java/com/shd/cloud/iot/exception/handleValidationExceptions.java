@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -54,7 +55,13 @@ public class handleValidationExceptions {
         errors.put("message", ex.getMessage());
         return errors;
     }
-
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(BadCredentialsException.class)
+    public Map<String, String> handleBadCredentialsExceptions(BadCredentialsException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Bad username or password");
+        return errors;
+    }
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public Map<String, String> handleMethodNotSupportExceptions(HttpRequestMethodNotSupportedException ex) {
